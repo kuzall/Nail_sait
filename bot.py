@@ -37,6 +37,7 @@ dp = Dispatcher()
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    conn.create_function("clean_phone", 1, lambda s: re.sub(r'\D', '', str(s or ''))[-10:])
     return conn
 
 def format_phone_link(phone: str) -> str:
@@ -44,6 +45,41 @@ def format_phone_link(phone: str) -> str:
     if digits.startswith('8'):
         digits = '7' + digits[1:]
     return digits
+
+def get_client_booking_actions_kb(booking_id: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🔄 Обновить статус", callback_data=f"cstatus:{booking_id}")
+        ],
+        [
+            InlineKeyboardButton(text="💬 Написать мастеру", url="https://t.me/kuzall"),
+            InlineKeyboardButton(text="📍 Как добраться", url="https://yandex.ru/maps/-/CDT65-0A")
+        ]
+    ])
+
+def render_client_booking_card(b: dict) -> str:
+    status_icon = {
+        "new": "🟡 В обработке (Ожидает подтверждения)",
+        "confirmed": "🟢 Подтверждена! Мастер ждёт вас ✨",
+        "completed": "✅ Процедура успешно выполнена",
+        "cancelled": "🔴 Запись отменена"
+    }.get(b.get("status", "new"), b.get("status", "new"))
+
+    price_val = b.get("price", 0)
+    discounted = int(round(price_val * 0.85)) if price_val else 0
+    price_str = f"{discounted:,} ₽ (со скидкой 15%)".replace(",", " ") if discounted else "По прайсу"
+
+    return (
+        f"🌸 <b>Ваша запись в студию Ангелины:</b>\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"🎫 <b>Номер брони:</b> <code>№ {b['id']}</code>\n"
+        f"💅 <b>Услуга:</b> {b['service']}\n"
+        f"🕒 <b>Дата и время:</b> <b>{b['date']}</b>\n"
+        f"💵 <b>Стоимость:</b> <b>{price_str}</b>\n"
+        f"📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира / Батюшкова)\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"Статус: <b>{status_icon}</b>"
+    )
 
 # ==================== KEYBOARDS ====================
 def get_main_keyboard() -> ReplyKeyboardMarkup:
@@ -187,40 +223,44 @@ async def cmd_start(message: Message):
     user_id = message.from_user.id
     name = message.from_user.first_name or "Клиент"
     
-    # Check deep link e.g. /start BK-105
+    # Check deep link e.g. /start BK-105 or /start 105
     text_parts = message.text.split() if message.text else []
     deep_code = text_parts[1].strip() if len(text_parts) > 1 else ""
 
-    if deep_code.startswith("BK-"):
+    if deep_code:
+        clean_code = deep_code.upper()
+        if not clean_code.startswith("BK-") and clean_code.isdigit():
+            clean_code = f"BK-{clean_code}"
+
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM bookings WHERE id = ?", (deep_code,))
+        cursor.execute("SELECT * FROM bookings WHERE id = ? OR id = ?", (clean_code, deep_code))
         row = cursor.fetchone()
         if row:
             b = dict(row)
             cursor.execute("UPDATE bookings SET client_chat_id = ?, telegram_username = ? WHERE id = ?",
-                           (user_id, message.from_user.username or "", deep_code))
+                           (user_id, message.from_user.username or "", b["id"]))
+            
+            # Auto-bind any other active bookings for this client's phone
+            if b.get("phone"):
+                cursor.execute("""
+                    UPDATE bookings 
+                    SET client_chat_id = ?, telegram_username = ? 
+                    WHERE clean_phone(phone) = clean_phone(?) AND status != 'cancelled'
+                """, (user_id, message.from_user.username or "", b["phone"]))
             conn.commit()
             conn.close()
 
-            status_icon = {
-                "new": "🟡 Ожидает подтверждения мастером",
-                "confirmed": "🟢 Подтверждена мастером",
-                "completed": "✅ Завершена",
-                "cancelled": "🔴 Отменена"
-            }.get(b["status"], b["status"])
-
             await message.answer(
                 f"🌸 <b>Здравствуйте, {name}!</b>\n\n"
-                f"✅ Ваша запись <b>№ {b['id']}</b> успешно привязана к Telegram!\n\n"
-                f"━━━━━━━━━━━━━━━━━━\n"
-                f"💅 <b>Услуга:</b> {b['service']}\n"
-                f"🕒 <b>Дата и время:</b> <b>{b['date']}</b>\n"
-                f"📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира)\n"
-                f"Статус: <b>{status_icon}</b>\n"
-                f"━━━━━━━━━━━━━━━━━━\n\n"
-                f"🔔 <i>Теперь вы будете получать мгновенные уведомления о статусе вашего визита прямо сюда в чат!</i>",
+                f"✅ Ваша запись <b>№ {b['id']}</b> успешно подключена к Telegram-боту!\n"
+                f"🔔 <i>Как только мастер подтвердит окошко или изменит время, вы сразу получите уведомление в этот чат.</i>",
                 reply_markup=get_client_keyboard()
+            )
+
+            await message.answer(
+                render_client_booking_card(b),
+                reply_markup=get_client_booking_actions_kb(b["id"])
             )
 
             # Alert admin
@@ -228,7 +268,7 @@ async def cmd_start(message: Message):
                 try:
                     await bot.send_message(
                         chat_id=admin_id,
-                        text=f"📱 Клиент <b>{name}</b> привязал Telegram к записи <b>№ {b['id']}</b> ({b['name']}). Теперь бот уведомит его при подтверждении."
+                        text=f"📱 Клиент <b>{name}</b> подключил Telegram к записи <b>№ {b['id']}</b> ({b['name']}). Теперь бот уведомит его при подтверждении."
                     )
                 except Exception:
                     pass
@@ -272,32 +312,23 @@ async def cmd_my_booking(message: Message):
     if not rows:
         await message.answer(
             "📋 <b>У вас пока нет активных записей, привязанных к этому Telegram.</b>\n\n"
-            "Вы можете записаться прямо сейчас, нажав кнопку «💅 Записаться на визит», "
-            "или если вы уже записались на сайте — перейдите по ссылке в электронном талоне на сайте.",
+            "💬 Чтобы привязать запись и отслеживать статус, <b>отправьте в чат номер вашей брони</b> "
+            "(например: <code>BK-104</code>) или <b>номер телефона</b>, указанный при записи.\n\n"
+            "Либо нажмите «💅 Записаться на визит», чтобы оформить новую запись со скидкой 15%!",
             reply_markup=get_client_keyboard()
         )
         return
 
-    lines = ["🌸 <b>Ваши записи в студию Ангелины:</b>\n"]
-    for idx, b in enumerate(rows, 1):
-        status_icon = {
-            "new": "🟡 Ожидает подтверждения",
-            "confirmed": "🟢 Подтверждена мастером",
-            "completed": "✅ Завершена",
-            "cancelled": "🔴 Отменена"
-        }.get(b["status"], b["status"])
-
-        lines.append(
-            f"<b>{idx}. Запись № {b['id']}</b>\n"
-            f"💅 Услуга: {b['service']}\n"
-            f"🕒 Время: <b>{b['date']}</b>\n"
-            f"Статус: <b>{status_icon}</b>\n"
-            f"📍 г. Вологда, Центр (ул. Мира)\n"
+    await message.answer(
+        f"🌸 <b>Ваши активные записи ({len(rows)}):</b>\n"
+        f"<i>Нажмите «🔄 Обновить статус» на карточке для проверки в реальном времени.</i>",
+        reply_markup=get_client_keyboard()
+    )
+    for b in rows:
+        await message.answer(
+            render_client_booking_card(b),
+            reply_markup=get_client_booking_actions_kb(b["id"])
         )
-        if idx < len(rows):
-            lines.append("────────────────────")
-    lines.append("\n<i>По вопросам переноса или отмены напишите мастеру в мессенджер MAX: +7 (992) 282-11-58</i>")
-    await message.answer("\n".join(lines), reply_markup=get_client_keyboard())
 
 @dp.message(F.text == "📍 Адрес и контакты")
 async def cmd_contacts(message: Message):
@@ -660,6 +691,107 @@ async def on_done(callback: CallbackQuery):
         )
     else:
         await callback.answer("Запись не найдена", show_alert=True)
+
+# ==================== CLIENT STATUS REFRESH & LOOKUP ====================
+@dp.callback_query(F.data.startswith("cstatus:"))
+async def on_client_status_refresh(callback: CallbackQuery):
+    booking_id = callback.data.split(":")[1]
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bookings WHERE id = ?", (booking_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        await callback.answer("Запись не найдена", show_alert=True)
+        return
+
+    b = dict(row)
+    status_label = {
+        "new": "🟡 Ожидает подтверждения",
+        "confirmed": "🟢 Подтверждена мастером!",
+        "completed": "✅ Процедура выполнена",
+        "cancelled": "🔴 Запись отменена"
+    }.get(b.get("status", "new"), b.get("status", "new"))
+
+    await callback.answer(f"Статус: {status_label}")
+    try:
+        await callback.message.edit_text(
+            render_client_booking_card(b),
+            reply_markup=get_client_booking_actions_kb(b["id"])
+        )
+    except Exception:
+        pass
+
+@dp.message(F.text & ~F.text.startswith("/"))
+async def handle_client_text_lookup(message: Message):
+    if message.from_user.id in ADMIN_IDS:
+        return
+    
+    # Ignore predefined reply keyboard buttons
+    if message.text in ["📋 Моя запись", "📍 Адрес и контакты", "💅 Записаться на визит"]:
+        return
+
+    text = message.text.strip()
+    user_id = message.from_user.id
+    name = message.from_user.first_name or "Клиент"
+
+    # 1. Booking ID lookup (e.g. "BK-104", "#BK-104", "104", "bk104")
+    clean_id = text.upper().replace("#", "").strip()
+    if clean_id.startswith("BK") and not clean_id.startswith("BK-"):
+        clean_id = f"BK-{clean_id[2:]}"
+    elif clean_id.isdigit() and len(clean_id) <= 5:
+        clean_id = f"BK-{clean_id}"
+
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    rows = []
+    if clean_id.startswith("BK-"):
+        cursor.execute("SELECT * FROM bookings WHERE id = ?", (clean_id,))
+        r = cursor.fetchone()
+        if r:
+            rows = [dict(r)]
+
+    # 2. Phone lookup (if text contains 10+ digits)
+    if not rows:
+        digits = re.sub(r'\D', '', text)
+        if len(digits) >= 10:
+            clean_10 = digits[-10:]
+            cursor.execute("SELECT * FROM bookings WHERE clean_phone(phone) = ? ORDER BY created_at DESC LIMIT 3", (clean_10,))
+            rows = [dict(r) for r in cursor.fetchall()]
+
+    if rows:
+        # Bind client_chat_id
+        for b in rows:
+            cursor.execute("UPDATE bookings SET client_chat_id = ?, telegram_username = ? WHERE id = ?",
+                           (user_id, message.from_user.username or "", b["id"]))
+        conn.commit()
+        conn.close()
+
+        await message.answer(
+            f"🌸 Здравствуйте, {name}! Найдено записей: <b>{len(rows)}</b>.\n"
+            f"✅ Уведомления подключены к этому чату!",
+            reply_markup=get_client_keyboard()
+        )
+        for b in rows:
+            await message.answer(
+                render_client_booking_card(b),
+                reply_markup=get_client_booking_actions_kb(b["id"])
+            )
+        return
+
+    conn.close()
+
+    # Friendly hint if input was not recognized
+    await message.answer(
+        "🌸 <b>Студия ногтевого сервиса Ангелины Осиной</b>\n\n"
+        "Чтобы проверить статус вашей записи, отправьте в этот чат:\n"
+        "• <b>Номер брони</b> (например: <code>BK-104</code>)\n"
+        "• или <b>Номер телефона</b>, указанный при записи.\n\n"
+        "Либо нажмите «💅 Записаться на визит» в меню ниже:",
+        reply_markup=get_client_keyboard()
+    )
 
 # ==================== MAIN RUNNER ====================
 async def main():

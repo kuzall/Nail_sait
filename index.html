@@ -1268,10 +1268,11 @@
                   <!-- Action buttons -->
                   <div class="space-y-2 pt-1">
                     <!-- Telegram notification button -->
-                    <a id="voucher-tg-link" href="https://t.me/kuzall" target="_blank" class="w-full py-2.5 px-3 rounded-xl font-semibold text-white bg-[#2AABEE] hover:bg-[#229ED9] transition shadow flex items-center justify-center gap-2 text-xs">
+                    <a id="voucher-tg-link" href="https://t.me/kalendarlinibot" target="_blank" class="w-full py-3 px-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:from-[#229ED9] hover:to-[#1E88E5] transition shadow-md shadow-sky-500/25 flex items-center justify-center gap-2 text-xs">
                       <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.37.75-.56 2.93-1.27 4.88-2.11 5.86-2.52 2.79-1.16 3.37-1.36 3.75-1.36.08 0 .28.02.4.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
-                      <span>Получать уведомления в Telegram</span>
+                      <span>🔔 Отслеживать запись в Telegram-боте</span>
                     </a>
+                    <p class="text-[10px] text-center text-stone-500">Бот откроется с вашей бронью. Нажмите «Запустить / Start», чтобы получать статус в ЛС.</p>
 
                     <!-- Google Calendar button -->
                     <a id="voucher-calendar-btn" href="#" target="_blank" class="w-full py-2 px-3 rounded-xl font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center gap-2 text-xs">
@@ -1710,7 +1711,7 @@
 
       // Update Telegram link with deep code so client can bind notifications
       if (tgLinkEl) {
-        tgLinkEl.href = `https://t.me/kuzall?text=Здравствуйте,+Ангелина!+Я+записалась+на+сайте+(№+${b.id},+${encodeURIComponent(b.date)})`;
+        tgLinkEl.href = `https://t.me/kalendarlinibot?start=${encodeURIComponent(b.id)}`;
       }
 
       // Update Google Calendar button
@@ -1922,13 +1923,19 @@
               <div class="text-brand-600 font-semibold">${item.service}</div>
               <div class="text-stone-500">🕒 ${item.date || 'Дата уточняется'}</div>
               <div class="text-stone-500">📍 г. Вологда, Центр (ул. Мира)</div>
-              <div class="pt-2 flex gap-2">
-                <a href="https://t.me/kuzall" target="_blank" class="flex-1 text-center py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold text-xs transition">
-                  Написать Ангелине
+              <div class="pt-2 flex flex-col gap-2">
+                <a href="https://t.me/kalendarlinibot?start=${encodeURIComponent(item.id)}" target="_blank" class="w-full text-center py-2 px-3 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50 text-[#2AABEE] hover:from-sky-100 hover:to-blue-100 font-semibold text-xs transition flex items-center justify-center gap-1.5 border border-sky-100">
+                  <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.37.75-.56 2.93-1.27 4.88-2.11 5.86-2.52 2.79-1.16 3.37-1.36 3.75-1.36.08 0 .28.02.4.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
+                  <span>🔔 Отслеживать в Telegram-боте</span>
                 </a>
-                <a href="tel:+79922821158" class="flex-1 text-center py-2 rounded-xl bg-stone-200/70 text-stone-800 hover:bg-stone-300 font-semibold text-xs transition">
-                  Позвонить
-                </a>
+                <div class="flex gap-2">
+                  <a href="https://t.me/kuzall" target="_blank" class="flex-1 text-center py-2 rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 font-semibold text-xs transition">
+                    Написать мастеру
+                  </a>
+                  <a href="tel:+79922821158" class="flex-1 text-center py-2 rounded-xl bg-stone-200/70 text-stone-800 hover:bg-stone-300 font-semibold text-xs transition">
+                    Позвонить
+                  </a>
+                </div>
               </div>
             </div>
           `;
