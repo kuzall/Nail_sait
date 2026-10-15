@@ -4,7 +4,7 @@ import asyncio
 import sqlite3
 import re
 import html
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Windows console encoding safeguard
 if sys.platform == "win32":
@@ -91,7 +91,10 @@ def get_main_keyboard() -> ReplyKeyboardMarkup:
             KeyboardButton(text="🗓 Записи на завтра")
         ],
         [
-            KeyboardButton(text="📊 Статистика и доход"),
+            KeyboardButton(text="📋 Все записи"),
+            KeyboardButton(text="📊 Статистика и доход")
+        ],
+        [
             KeyboardButton(text="📱 Открыть CRM", web_app=WebAppInfo(url=WEB_APP_URL))
         ]
     ]
@@ -116,10 +119,11 @@ def get_client_keyboard() -> ReplyKeyboardMarkup:
 def get_schedule_picker_kb(rows: list) -> InlineKeyboardMarkup:
     buttons = []
     for idx, b in enumerate(rows, 1):
-        time_clean = b['date'].replace("Сегодня, ", "").replace("Завтра, ", "")
+        time_clean = b.get('date', '').replace("Сегодня, ", "").replace("Завтра, ", "")
+        time_label = b.get('slot_time') or time_clean
         buttons.append([
             InlineKeyboardButton(
-                text=f"👉 {idx}. {b['name']} ({time_clean})",
+                text=f"👉 {idx}. {b['name']} ({time_label})",
                 callback_data=f"sel:{b['id']}"
             )
         ])
@@ -363,25 +367,35 @@ async def cmd_contacts(message: Message):
         reply_markup=contacts_kb
     )
 
+MONTHS_RU = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+
 @dp.message(F.text == "📅 Записи на сегодня")
 @dp.message(Command("today"))
 async def cmd_today(message: Message):
     if message.from_user.id not in ADMIN_IDS:
         return
 
+    now = datetime.now()
+    today_iso = now.strftime("%Y-%m-%d")
+    today_ru = f"{now.day} {MONTHS_RU[now.month - 1]}"
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT * FROM bookings 
-        WHERE date LIKE '%сегодня%' OR date LIKE '%Сегодня%'
-        ORDER BY created_at DESC
-    """)
+        WHERE slot_date = ? 
+           OR date LIKE ?
+           OR date LIKE ?
+           OR date LIKE '%сегодня%' 
+           OR date LIKE '%Сегодня%'
+        ORDER BY slot_time ASC, created_at DESC
+    """, (today_iso, f"%{today_iso}%", f"%{today_ru}%"))
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
 
     if not rows:
         await message.answer(
-            "📅 <b>На сегодня записей нет</b>\n"
+            f"📅 <b>На сегодня ({today_ru}) записей нет</b>\n"
             "Все свободные окна доступны для клиентов.",
             reply_markup=get_main_keyboard()
         )
@@ -389,7 +403,7 @@ async def cmd_today(message: Message):
 
     # Clean unified schedule message with one-click selector buttons
     await message.answer(
-        render_schedule_summary("Записи на сегодня", rows),
+        render_schedule_summary(f"Записи на сегодня ({today_ru})", rows),
         reply_markup=get_schedule_picker_kb(rows)
     )
 
@@ -399,26 +413,71 @@ async def cmd_tomorrow(message: Message):
     if message.from_user.id not in ADMIN_IDS:
         return
 
+    tomorrow = datetime.now() + timedelta(days=1)
+    tomorrow_iso = tomorrow.strftime("%Y-%m-%d")
+    tomorrow_ru = f"{tomorrow.day} {MONTHS_RU[tomorrow.month - 1]}"
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT * FROM bookings 
-        WHERE date LIKE '%завтра%' OR date LIKE '%Завтра%'
-        ORDER BY created_at DESC
-    """)
+        WHERE slot_date = ? 
+           OR date LIKE ?
+           OR date LIKE ?
+           OR date LIKE '%завтра%' 
+           OR date LIKE '%Завтра%'
+        ORDER BY slot_time ASC, created_at DESC
+    """, (tomorrow_iso, f"%{tomorrow_iso}%", f"%{tomorrow_ru}%"))
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
 
     if not rows:
         await message.answer(
-            "🗓 <b>На завтра записей пока нет</b>.",
+            f"🗓 <b>На завтра ({tomorrow_ru}) записей пока нет</b>.",
             reply_markup=get_main_keyboard()
         )
         return
 
     # Clean unified schedule message with one-click selector buttons
     await message.answer(
-        render_schedule_summary("Записи на завтра", rows),
+        render_schedule_summary(f"Записи на завтра ({tomorrow_ru})", rows),
+        reply_markup=get_schedule_picker_kb(rows)
+    )
+
+@dp.message(F.text == "📋 Все записи")
+@dp.message(Command("all", "bookings", "list"))
+async def cmd_all_bookings(message: Message):
+    if message.from_user.id not in ADMIN_IDS:
+        return
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM bookings 
+        ORDER BY 
+            CASE 
+                WHEN status = 'new' THEN 1 
+                WHEN status = 'confirmed' THEN 2 
+                WHEN status = 'completed' THEN 3
+                ELSE 4 
+            END,
+            COALESCE(NULLIF(slot_date, ''), date) ASC,
+            created_at DESC
+        LIMIT 25
+    """)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    if not rows:
+        await message.answer(
+            "📋 <b>В базе пока нет записей.</b>\n"
+            "Все новые заявки с сайта будут появляться здесь.",
+            reply_markup=get_main_keyboard()
+        )
+        return
+
+    await message.answer(
+        render_schedule_summary("Все записи студии", rows),
         reply_markup=get_schedule_picker_kb(rows)
     )
 
