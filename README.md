@@ -43,8 +43,8 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone https://github.com/kuzall/angelina-nail-studio.git
-cd angelina-nail-studio
+git clone https://github.com/kuzall/Nail_sait.git
+cd Nail_sait
 ```
 
 ### 2. Установка зависимостей для бота
@@ -93,3 +93,4 @@ python bot.py
 ## 👩‍🎨 Автор проекта
 - Студия: **Angelina Nail Studio**
 - Разработка: [kuzall](https://github.com/kuzall)
+- Если будете брать сайт, ставте звезды, пишите комменты.
