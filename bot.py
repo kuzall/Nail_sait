@@ -99,9 +99,10 @@ def get_client_keyboard() -> ReplyKeyboardMarkup:
     site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
     if not site_url.startswith("http"):
         site_url = "https://138.249.149.151.sslip.io"
+    booking_url = f"{site_url}/#booking"
     kb = [
         [
-            KeyboardButton(text="💅 Записаться на визит", web_app=WebAppInfo(url=site_url))
+            KeyboardButton(text="💅 Записаться на визит", web_app=WebAppInfo(url=booking_url))
         ],
         [
             KeyboardButton(text="📋 Моя запись"),
