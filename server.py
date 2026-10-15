@@ -169,6 +169,7 @@ def notify_telegram_client(client_chat_id, text):
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    conn.create_function("clean_phone", 1, lambda s: re.sub(r'\D', '', str(s or ''))[-10:])
     return conn
 
 def init_db():
@@ -338,16 +339,16 @@ class AppHandler(SimpleHTTPRequestHandler):
         # API: Client lookup by phone
         elif path == "/api/client/status":
             phone_param = params.get("phone", [""])[0].strip()
-            # Clean non-digits
-            clean_digits = "".join(filter(str.isdigit, phone_param))
+            clean_digits = re.sub(r'\D', '', phone_param)
             if len(clean_digits) < 7:
                 return self.send_json({"success": False, "message": "Введите корректный номер телефона"}, 400)
             
-            # Match last 7-10 digits
-            last_digits = clean_digits[-7:]
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM bookings WHERE phone LIKE ? ORDER BY created_at DESC", (f"%{last_digits}%",))
+            if len(clean_digits) >= 10:
+                cursor.execute("SELECT * FROM bookings WHERE clean_phone(phone) = ? ORDER BY created_at DESC", (clean_digits[-10:],))
+            else:
+                cursor.execute("SELECT * FROM bookings WHERE clean_phone(phone) LIKE ? ORDER BY created_at DESC", (f"%{clean_digits}",))
             rows = [dict(row) for row in cursor.fetchall()]
             conn.close()
 
@@ -397,10 +398,31 @@ class AppHandler(SimpleHTTPRequestHandler):
             client_chat_id = payload.get("client_chat_id", 0)
             status = payload.get("status", "new")
 
-            # Check for conflict if specific slot was chosen
+            clean_digits = re.sub(r'\D', '', phone)[-10:]
+
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # 1. Exact active duplicate check (same phone, same slot_date, same slot_time)
             if slot_date and slot_time:
-                conn = get_db()
-                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT * FROM bookings 
+                    WHERE clean_phone(phone) = ? 
+                      AND slot_date = ? 
+                      AND slot_time = ? 
+                      AND status != 'cancelled'
+                """, (clean_digits, slot_date, slot_time))
+                exact_row = cursor.fetchone()
+                if exact_row:
+                    b = dict(exact_row)
+                    conn.close()
+                    return self.send_json({
+                        "success": False,
+                        "error": f"У вас уже оформлена запись на это время (№ {b['id']}, {b['service']}). Мастер свяжется с вами или вы можете проверить статус во вкладке «Моя запись»."
+                    }, 409)
+
+            # 2. General slot conflict check (someone else booked this slot)
+            if slot_date and slot_time:
                 cursor.execute("""
                     SELECT COUNT(*) as cnt FROM bookings 
                     WHERE slot_date = ? AND slot_time = ? AND status != 'cancelled'
@@ -411,7 +433,37 @@ class AppHandler(SimpleHTTPRequestHandler):
                         "success": False, 
                         "error": "Это время уже занято другим клиентом. Пожалуйста, выберите другое свободное окошко."
                     }, 409)
-                conn.close()
+
+            # 3. Anti-duplicate / rapid re-submit check:
+            # If same phone already has an unconfirmed 'new' booking created within the last 15 minutes
+            cursor.execute("""
+                SELECT * FROM bookings 
+                WHERE clean_phone(phone) = ? 
+                  AND status = 'new'
+                ORDER BY created_at DESC LIMIT 1
+            """, (clean_digits,))
+            recent_pending = cursor.fetchone()
+            if recent_pending:
+                b = dict(recent_pending)
+                try:
+                    from datetime import datetime, timezone
+                    created_raw = b.get("created_at", "")
+                    # SQLite timestamp format: YYYY-MM-DD HH:MM:SS (UTC)
+                    created_dt = datetime.strptime(created_raw.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                    diff_seconds = (datetime.now(timezone.utc).replace(tzinfo=None) - created_dt).total_seconds()
+                except Exception:
+                    diff_seconds = 0
+
+                # If within 15 minutes (900s), return existing booking without duplicating
+                if 0 <= diff_seconds < 900:
+                    conn.close()
+                    return self.send_json({
+                        "success": True,
+                        "booking": b,
+                        "is_duplicate": True,
+                        "message": f"Ваша заявка № {b['id']} на {b['date']} уже принята и ожидает подтверждения мастера."
+                    })
+            conn.close()
 
             # Format human-friendly date string
             date = payload.get("date", "").strip()

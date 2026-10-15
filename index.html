@@ -1107,171 +1107,207 @@
             </div>
 
             <!-- Booking form -->
-            <!-- Booking form & Interactive Voucher -->
+            <!-- Booking form & Interactive Voucher with Tabs -->
             <div class="lg:col-span-5">
-              <!-- 1. The Interactive Booking Form -->
-              <form id="contact-form" class="bg-white text-stone-800 p-6 sm:p-8 rounded-3xl shadow-xl space-y-4">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-xl font-bold font-serif text-stone-900">Быстрая запись</h3>
-                  <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">-15% скидка</span>
-                </div>
-                <p class="text-xs text-stone-500">Выберите процедуру, удобную дату и время визита</p>
-
-                <!-- Service selector -->
-                <div>
-                  <label class="block text-xs font-semibold text-stone-700 mb-1">1. Интересующая услуга</label>
-                  <select id="service-select" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm bg-white font-medium text-stone-800">
-                    <option value="Маникюр + гель-лак (3 200 ₽)">Маникюр + гель-лак (3 200 ₽) — Хит</option>
-                    <option value="Маникюр + укрепление (3 700 ₽)">Маникюр + укрепление (3 700 ₽) — Самый стойкий</option>
-                    <option value="Маникюр без покрытия (1 900 ₽)">Маникюр без покрытия (1 900 ₽)</option>
-                    <option value="Маникюр с дизайном (4 200 ₽)">Маникюр с дизайном (4 200 ₽)</option>
-                    <option value="Smart-педикюр (2 300 ₽)">Smart-педикюр полный (2 300 ₽)</option>
-                    <option value="Другое / Консультация">Другое / Нужна консультация</option>
-                  </select>
-                </div>
-
-                <!-- Date picker pills -->
-                <div>
-                  <div class="flex items-center justify-between mb-1.5">
-                    <label class="block text-xs font-semibold text-stone-700">2. Выберите дату</label>
-                    <span id="selected-date-label" class="text-[11px] font-medium text-brand-600"></span>
-                  </div>
-                  <div id="date-pills-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                    <!-- Dynamic Date Buttons rendered by JS -->
-                  </div>
-                  <input type="hidden" id="slot-date" name="slot_date" value="">
-                </div>
-
-                <!-- Time slots picker -->
-                <div>
-                  <div class="flex items-center justify-between mb-1.5">
-                    <label class="block text-xs font-semibold text-stone-700">3. Свободное время</label>
-                    <span id="slot-loading-indicator" class="hidden text-[11px] text-stone-400">Обновление...</span>
-                  </div>
-                  <div id="time-slots-container" class="grid grid-cols-5 gap-2">
-                    <!-- Dynamic Slot Buttons rendered by JS -->
-                  </div>
-                  <input type="hidden" id="slot-time" name="slot_time" value="">
-                </div>
-
-                <!-- Client Info: Name & Phone -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <label class="block text-xs font-semibold text-stone-700 mb-1">Ваше имя</label>
-                    <input type="text" id="client-name" required placeholder="Екатерина" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона</label>
-                    <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
-                  </div>
-                </div>
-
-                <!-- Telegram username (optional) -->
-                <div>
-                  <label class="block text-xs font-semibold text-stone-700 mb-1">
-                    Telegram для уведомлений <span class="text-stone-400 font-normal">(по желанию)</span>
-                  </label>
-                  <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-stone-400 text-sm">@</span>
-                    <input type="text" id="client-tg" placeholder="username" class="w-full pl-8 pr-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-xs">
-                  </div>
-                </div>
-
-                <button type="submit" id="submit-booking-btn" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-lg shadow-brand-500/25 transition-all text-sm flex items-center justify-center gap-2">
-                  <span>Записаться со скидкой 15%</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </button>
-                <p class="text-[10px] text-center text-stone-400">Нажимая кнопку, вы соглашаетесь на обработку персональных данных</p>
-
-                <!-- Check booking status button for clients -->
-                <div class="pt-2 text-center border-t border-stone-100">
-                  <button type="button" id="open-client-status-btn" class="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline inline-flex items-center gap-1.5 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    <span>Уже записались? Проверить статус записи</span>
+              <div class="bg-white text-stone-800 p-6 sm:p-8 rounded-3xl shadow-xl space-y-4">
+                
+                <!-- Tab switcher -->
+                <div class="flex items-center p-1 bg-stone-100 rounded-2xl">
+                  <button type="button" id="tab-btn-booking" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-stone-900 shadow-sm flex items-center justify-center gap-1.5">
+                    <span>💅 Новая запись</span>
+                  </button>
+                  <button type="button" id="tab-btn-status" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-stone-500 hover:text-stone-900 flex items-center justify-center gap-1.5">
+                    <span>🔍 Моя запись / Статус</span>
                   </button>
                 </div>
 
-                <!-- Anti-spam Honeypot for bots -->
-                <input type="text" name="website_url" id="honeypot-field" style="display:none !important;" tabindex="-1" autocomplete="off">
+                <!-- 1. The Interactive Booking Form -->
+                <form id="contact-form" class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold font-serif text-stone-900">Быстрая запись</h3>
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">-15% скидка</span>
+                  </div>
+                  <p class="text-xs text-stone-500">Выберите процедуру, удобную дату и время визита</p>
 
-                <!-- Error notification box -->
-                <div id="form-error" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium"></div>
-              </form>
+                  <!-- Service selector -->
+                  <div>
+                    <label class="block text-xs font-semibold text-stone-700 mb-1">1. Интересующая услуга</label>
+                    <select id="service-select" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm bg-white font-medium text-stone-800">
+                      <option value="Маникюр + гель-лак (3 200 ₽)">Маникюр + гель-лак (3 200 ₽) — Хит</option>
+                      <option value="Маникюр + укрепление (3 700 ₽)">Маникюр + укрепление (3 700 ₽) — Самый стойкий</option>
+                      <option value="Маникюр без покрытия (1 900 ₽)">Маникюр без покрытия (1 900 ₽)</option>
+                      <option value="Маникюр с дизайном (4 200 ₽)">Маникюр с дизайном (4 200 ₽)</option>
+                      <option value="Smart-педикюр (2 300 ₽)">Smart-педикюр полный (2 300 ₽)</option>
+                      <option value="Другое / Консультация">Другое / Нужна консультация</option>
+                    </select>
+                  </div>
 
-              <!-- 2. Electronic Voucher (Талон бронирования с живым статусом) -->
-              <div id="booking-voucher" class="hidden bg-white text-stone-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-5 border-2 border-rose-100 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-rose-100/40 rounded-full blur-2xl pointer-events-none"></div>
+                  <!-- Date picker pills -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="block text-xs font-semibold text-stone-700">2. Выберите дату</label>
+                      <span id="selected-date-label" class="text-[11px] font-medium text-brand-600"></span>
+                    </div>
+                    <div id="date-pills-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                      <!-- Dynamic Date Buttons rendered by JS -->
+                    </div>
+                    <input type="hidden" id="slot-date" name="slot_date" value="">
+                  </div>
 
-                <div class="flex items-center justify-between border-b border-stone-100 pb-4">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-sm font-serif font-bold">A</div>
+                  <!-- Time slots picker -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="block text-xs font-semibold text-stone-700">3. Свободное время</label>
+                      <span id="slot-loading-indicator" class="hidden text-[11px] text-stone-400">Обновление...</span>
+                    </div>
+                    <div id="time-slots-container" class="grid grid-cols-5 gap-2">
+                      <!-- Dynamic Slot Buttons rendered by JS -->
+                    </div>
+                    <input type="hidden" id="slot-time" name="slot_time" value="">
+                  </div>
+
+                  <!-- Client Info: Name & Phone -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div>
-                      <h4 class="font-bold text-sm text-stone-900 leading-tight">Angelina Studio</h4>
-                      <div class="text-[11px] text-stone-400">Электронный талон записи</div>
+                      <label class="block text-xs font-semibold text-stone-700 mb-1">Ваше имя</label>
+                      <input type="text" id="client-name" required placeholder="Екатерина" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона</label>
+                      <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
                     </div>
                   </div>
-                  <span id="voucher-code" class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-stone-900 text-white">#BK---</span>
-                </div>
 
-                <!-- Live Status Banner -->
-                <div id="voucher-status-card" class="p-4 rounded-2xl bg-amber-50 border border-amber-200/80 transition-all duration-500">
-                  <div class="flex items-center justify-between mb-1">
-                    <span id="voucher-status-pill" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white text-amber-800 shadow-sm border border-amber-200">
-                      <span id="voucher-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                      <span id="voucher-status-text">Ожидает подтверждения мастером</span>
-                    </span>
-                    <span id="voucher-live-indicator" class="text-[10px] font-semibold text-stone-400 flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live
-                    </span>
+                  <!-- Telegram username (optional) -->
+                  <div>
+                    <label class="block text-xs font-semibold text-stone-700 mb-1">
+                      Telegram для уведомлений <span class="text-stone-400 font-normal">(по желанию)</span>
+                    </label>
+                    <div class="relative">
+                      <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-stone-400 text-sm">@</span>
+                      <input type="text" id="client-tg" placeholder="username" class="w-full pl-8 pr-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-xs">
+                    </div>
                   </div>
-                  <p id="voucher-status-desc" class="text-xs text-amber-900/90 mt-2">
-                    Ангелина получила вашу заявку в Telegram. Как только мастер подтвердит окошко, этот статус обновится на экране в реальном времени!
-                  </p>
-                </div>
 
-                <!-- Appointment Details -->
-                <div class="bg-stone-50 rounded-2xl p-4 space-y-2.5 text-xs">
-                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
-                    <span class="text-stone-500">💅 Услуга:</span>
-                    <span id="voucher-service" class="font-bold text-stone-900 text-right"></span>
-                  </div>
-                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
-                    <span class="text-stone-500">🕒 Дата и время:</span>
-                    <span id="voucher-datetime" class="font-bold text-brand-700 text-right"></span>
-                  </div>
-                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
-                    <span class="text-stone-500">💵 Стоимость:</span>
-                    <span id="voucher-price" class="font-bold text-emerald-700 text-right"></span>
-                  </div>
-                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
-                    <span class="text-stone-500">👤 Клиент:</span>
-                    <span id="voucher-client" class="font-semibold text-stone-800 text-right"></span>
-                  </div>
-                  <div class="flex justify-between items-center pt-1">
-                    <span class="text-stone-500">📍 Локация:</span>
-                    <span class="font-semibold text-stone-800 text-right">г. Вологда, Центр (ул. Мира)</span>
-                  </div>
-                </div>
-
-                <!-- Action buttons -->
-                <div class="space-y-2 pt-1">
-                  <!-- Telegram notification button -->
-                  <a id="voucher-tg-link" href="https://t.me/kuzall" target="_blank" class="w-full py-3 px-4 rounded-xl font-semibold text-white bg-[#2AABEE] hover:bg-[#229ED9] transition shadow flex items-center justify-center gap-2 text-xs">
-                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.37.75-.56 2.93-1.27 4.88-2.11 5.86-2.52 2.79-1.16 3.37-1.36 3.75-1.36.08 0 .28.02.4.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
-                    <span>Получать уведомления о визите в Telegram</span>
-                  </a>
-
-                  <!-- Google Calendar button -->
-                  <a id="voucher-calendar-btn" href="#" target="_blank" class="w-full py-2.5 px-4 rounded-xl font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center gap-2 text-xs">
-                    <svg class="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span>Добавить визит в Google Календарь</span>
-                  </a>
-
-                  <!-- Return button -->
-                  <button type="button" id="voucher-new-booking-btn" class="w-full text-center text-[11px] font-semibold text-stone-400 hover:text-stone-600 pt-2 transition">
-                    Оформить ещё одну запись →
+                  <button type="submit" id="submit-booking-btn" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-lg shadow-brand-500/25 transition-all text-sm flex items-center justify-center gap-2">
+                    <span>Записаться со скидкой 15%</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                   </button>
+                  <p class="text-[10px] text-center text-stone-400">Нажимая кнопку, вы соглашаетесь на обработку персональных данных</p>
+
+                  <!-- Link to switch to status tab -->
+                  <div class="pt-2 text-center border-t border-stone-100">
+                    <button type="button" id="switch-to-status-btn" class="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline inline-flex items-center gap-1.5 transition">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                      <span>Уже записались? Проверить статус записи</span>
+                    </button>
+                  </div>
+
+                  <!-- Anti-spam Honeypot for bots -->
+                  <input type="text" name="website_url" id="honeypot-field" style="display:none !important;" tabindex="-1" autocomplete="off">
+
+                  <!-- Error notification box -->
+                  <div id="form-error" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium"></div>
+                </form>
+
+                <!-- 2. Electronic Voucher (Талон бронирования с живым статусом) -->
+                <div id="booking-voucher" class="hidden space-y-5 border-2 border-rose-100 rounded-2xl p-5 relative overflow-hidden bg-white">
+                  <div class="absolute top-0 right-0 w-32 h-32 bg-rose-100/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                  <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-xs font-serif font-bold">A</div>
+                      <div>
+                        <h4 class="font-bold text-xs text-stone-900 leading-tight">Angelina Studio</h4>
+                        <div class="text-[10px] text-stone-400">Электронный талон записи</div>
+                      </div>
+                    </div>
+                    <span id="voucher-code" class="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-stone-900 text-white">#BK---</span>
+                  </div>
+
+                  <!-- Live Status Banner -->
+                  <div id="voucher-status-card" class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 transition-all duration-500">
+                    <div class="flex items-center justify-between mb-1">
+                      <span id="voucher-status-pill" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white text-amber-800 shadow-sm border border-amber-200">
+                        <span id="voucher-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span id="voucher-status-text">Ожидает подтверждения</span>
+                      </span>
+                      <span id="voucher-live-indicator" class="text-[10px] font-semibold text-stone-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live
+                      </span>
+                    </div>
+                    <p id="voucher-status-desc" class="text-xs text-amber-900/90 mt-2">
+                      Ангелина получила заявку. Как только мастер подтвердит окошко, статус обновится на экране в реальном времени!
+                    </p>
+                  </div>
+
+                  <!-- Appointment Details -->
+                  <div class="bg-stone-50 rounded-2xl p-3.5 space-y-2 text-xs">
+                    <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                      <span class="text-stone-500">💅 Услуга:</span>
+                      <span id="voucher-service" class="font-bold text-stone-900 text-right"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                      <span class="text-stone-500">🕒 Дата и время:</span>
+                      <span id="voucher-datetime" class="font-bold text-brand-700 text-right"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                      <span class="text-stone-500">💵 Стоимость:</span>
+                      <span id="voucher-price" class="font-bold text-emerald-700 text-right"></span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                      <span class="text-stone-500">👤 Клиент:</span>
+                      <span id="voucher-client" class="font-semibold text-stone-800 text-right"></span>
+                    </div>
+                    <div class="flex justify-between items-center pt-1">
+                      <span class="text-stone-500">📍 Локация:</span>
+                      <span class="font-semibold text-stone-800 text-right">г. Вологда, Центр (ул. Мира)</span>
+                    </div>
+                  </div>
+
+                  <!-- Action buttons -->
+                  <div class="space-y-2 pt-1">
+                    <!-- Telegram notification button -->
+                    <a id="voucher-tg-link" href="https://t.me/kuzall" target="_blank" class="w-full py-2.5 px-3 rounded-xl font-semibold text-white bg-[#2AABEE] hover:bg-[#229ED9] transition shadow flex items-center justify-center gap-2 text-xs">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.37.75-.56 2.93-1.27 4.88-2.11 5.86-2.52 2.79-1.16 3.37-1.36 3.75-1.36.08 0 .28.02.4.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
+                      <span>Получать уведомления в Telegram</span>
+                    </a>
+
+                    <!-- Google Calendar button -->
+                    <a id="voucher-calendar-btn" href="#" target="_blank" class="w-full py-2 px-3 rounded-xl font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center gap-2 text-xs">
+                      <svg class="w-3.5 h-3.5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span>Добавить в Google Календарь</span>
+                    </a>
+
+                    <!-- Return button -->
+                    <button type="button" id="voucher-new-booking-btn" class="w-full text-center text-[11px] font-semibold text-stone-400 hover:text-stone-600 pt-1 transition">
+                      Оформить ещё одну запись →
+                    </button>
+                  </div>
                 </div>
+
+                <!-- 3. Status Check Panel (Tab 2) -->
+                <div id="status-panel" class="hidden space-y-4">
+                  <div>
+                    <h3 class="text-xl font-bold font-serif text-stone-900">Проверить статус записи</h3>
+                    <p class="text-xs text-stone-500">Введите номер телефона, чтобы посмотреть статус визита</p>
+                  </div>
+
+                  <form id="status-panel-form" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона</label>
+                      <input type="tel" id="status-panel-phone" required placeholder="+7 (999) 000-00-00" class="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-brand-500 font-medium">
+                    </div>
+
+                    <button type="submit" id="status-search-btn" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-md shadow-brand-500/25 transition text-xs flex items-center justify-center gap-2">
+                      <span>Найти мои записи</span>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                  </form>
+
+                  <div id="status-panel-results" class="hidden pt-1"></div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -1616,6 +1652,8 @@
             return;
           }
           createdBooking = result.booking;
+          const isDuplicate = result.is_duplicate;
+          const duplicateMsg = result.message;
         } catch (err) {
           console.warn('API submission fallback:', err);
           createdBooking = {
@@ -1643,11 +1681,11 @@
         }
 
         // 6. Transition to Electronic Voucher with Live Status Tracking
-        showElectronicVoucher(createdBooking);
+        showElectronicVoucher(createdBooking, isDuplicate, duplicateMsg);
       });
     }
 
-    function showElectronicVoucher(b) {
+    function showElectronicVoucher(b, isDuplicate = false, duplicateMsg = '') {
       if (!contactForm || !bookingVoucher) return;
       contactForm.classList.add('hidden');
       bookingVoucher.classList.remove('hidden');
@@ -1681,6 +1719,13 @@
         const calDetails = encodeURIComponent(`Запись в студию Ангелины Осиной.\nНомер брони: ${b.id}\nАдрес: г. Вологда, ул. Мира.\nТелефон мастера: +7 (992) 282-11-58`);
         const calLoc = encodeURIComponent('г. Вологда, ул. Мира');
         calBtnEl.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calTitle}&details=${calDetails}&location=${calLoc}`;
+      }
+
+      if (isDuplicate) {
+        const descEl = document.getElementById('voucher-status-desc');
+        if (descEl) {
+          descEl.innerHTML = `ℹ️ <b>У вас уже есть активная заявка!</b> ${duplicateMsg || 'Ангелина уже рассматривает её и свяжется с вами в ближайшее время.'}`;
+        }
       }
 
       // Start Live Polling for Master's Confirmation
@@ -1738,147 +1783,170 @@
       voucherNewBookingBtn.addEventListener('click', () => {
         if (liveStatusPollInterval) clearInterval(liveStatusPollInterval);
         if (bookingVoucher) bookingVoucher.classList.add('hidden');
+        showBookingTab();
         if (contactForm) {
-          contactForm.classList.remove('hidden');
           contactForm.reset();
           initDatePills();
         }
       });
     }
 
-    // 4. Client Status Check Modal
-    const clientStatusModal = document.getElementById('client-status-modal');
-    const openClientStatusBtn = document.getElementById('open-client-status-btn');
-    const closeClientStatusBtn = document.getElementById('close-client-status-btn');
-    const clientStatusForm = document.getElementById('client-status-form');
-    const clientPhoneSearch = document.getElementById('client-phone-search');
-    const clientStatusResult = document.getElementById('client-status-result');
+    // 6. Tabs & In-Card Status Panel Logic
+    const tabBtnBooking = document.getElementById('tab-btn-booking');
+    const tabBtnStatus = document.getElementById('tab-btn-status');
+    const statusPanel = document.getElementById('status-panel');
+    const switchToStatusBtn = document.getElementById('switch-to-status-btn');
+    const statusPanelPhone = document.getElementById('status-panel-phone');
+    const statusPanelForm = document.getElementById('status-panel-form');
+    const statusPanelResults = document.getElementById('status-panel-results');
 
-    function openStatusModal() {
-      if (clientStatusModal) {
-        clientStatusModal.classList.remove('hidden');
-        if (clientPhoneSearch) clientPhoneSearch.focus();
+    function showBookingTab() {
+      if (tabBtnBooking) {
+        tabBtnBooking.className = 'flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-stone-900 shadow-sm flex items-center justify-center gap-1.5';
+      }
+      if (tabBtnStatus) {
+        tabBtnStatus.className = 'flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-stone-500 hover:text-stone-900 flex items-center justify-center gap-1.5';
+      }
+      if (statusPanel) statusPanel.classList.add('hidden');
+      if (bookingVoucher && !bookingVoucher.classList.contains('hidden')) {
+        // keep voucher if user just booked
+      } else if (contactForm) {
+        contactForm.classList.remove('hidden');
       }
     }
 
-    function closeStatusModal() {
-      if (clientStatusModal) clientStatusModal.classList.add('hidden');
+    function showStatusTab() {
+      if (tabBtnStatus) {
+        tabBtnStatus.className = 'flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all bg-white text-stone-900 shadow-sm flex items-center justify-center gap-1.5';
+      }
+      if (tabBtnBooking) {
+        tabBtnBooking.className = 'flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-stone-500 hover:text-stone-900 flex items-center justify-center gap-1.5';
+      }
+      if (contactForm) contactForm.classList.add('hidden');
+      if (bookingVoucher) bookingVoucher.classList.add('hidden');
+      if (statusPanel) {
+        statusPanel.classList.remove('hidden');
+        
+        // Auto-copy phone from booking form if entered
+        const currentPhone = clientPhoneInput ? clientPhoneInput.value.trim() : '';
+        if (currentPhone && statusPanelPhone) {
+          statusPanelPhone.value = currentPhone;
+          const cleanDigits = currentPhone.replace(/\D/g, '');
+          if (cleanDigits.length >= 10) {
+            fetchClientBookings(currentPhone);
+          }
+        } else if (statusPanelPhone) {
+          statusPanelPhone.focus();
+        }
+      }
     }
 
-    if (openClientStatusBtn) openClientStatusBtn.addEventListener('click', openStatusModal);
-    if (closeClientStatusBtn) closeClientStatusBtn.addEventListener('click', closeStatusModal);
-    if (clientStatusModal) {
-      clientStatusModal.addEventListener('click', (e) => {
-        if (e.target === clientStatusModal) closeStatusModal();
+    if (tabBtnBooking) tabBtnBooking.addEventListener('click', showBookingTab);
+    if (tabBtnStatus) tabBtnStatus.addEventListener('click', showStatusTab);
+    if (switchToStatusBtn) switchToStatusBtn.addEventListener('click', showStatusTab);
+
+    // Phone mask for status search input
+    if (statusPanelPhone) {
+      statusPanelPhone.addEventListener('input', (e) => {
+        let input = e.target.value.replace(/\D/g, '');
+        if (input.startsWith('8')) input = '7' + input.slice(1);
+        if (!input.startsWith('7')) input = '7' + input;
+        input = input.substring(0, 11);
+
+        let formatted = '+7';
+        if (input.length > 1) formatted += ' (' + input.substring(1, 4);
+        if (input.length >= 4) formatted += ') ' + input.substring(4, 7);
+        if (input.length >= 7) formatted += '-' + input.substring(7, 9);
+        if (input.length >= 9) formatted += '-' + input.substring(9, 11);
+        e.target.value = formatted;
       });
     }
 
-    if (clientStatusForm) {
-      clientStatusForm.addEventListener('submit', async (e) => {
+    if (statusPanelForm) {
+      statusPanelForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const phone = clientPhoneSearch.value.trim();
-        clientStatusResult.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Поиск записи в базе...</div>';
-        clientStatusResult.classList.remove('hidden');
+        const phone = statusPanelPhone ? statusPanelPhone.value.trim() : '';
+        fetchClientBookings(phone);
+      });
+    }
 
-        let records = [];
+    async function fetchClientBookings(phone) {
+      if (!statusPanelResults) return;
+      statusPanelResults.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Поиск записей в базе...</div>';
+      statusPanelResults.classList.remove('hidden');
 
-        // Try API first
-        try {
-          const res = await fetch('/api/client/status?phone=' + encodeURIComponent(phone));
-          const data = await res.json();
-          if (data.success && data.found) {
-            records = data.bookings;
-          }
-        } catch (err) {}
+      let records = [];
 
-        // Fallback to localStorage search if API returned none or unavailable
-        if (records.length === 0) {
-          const stored = localStorage.getItem('angelina_bookings');
-          if (stored) {
-            try {
-              const all = JSON.parse(stored);
-              const cleanDigits = phone.replace(/[^\d]/g, '').slice(-7);
-              if (cleanDigits) {
-                records = all.filter(b => b.phone && b.phone.replace(/[^\d]/g, '').includes(cleanDigits));
-              }
-            } catch(e) {}
-          }
+      try {
+        const res = await fetch('/api/client/status?phone=' + encodeURIComponent(phone));
+        const data = await res.json();
+        if (data.success && data.found) {
+          records = data.bookings;
         }
+      } catch (err) {}
 
-        if (records.length > 0) {
-          const statusLabels = {
-            'new': { label: '🟡 В обработке (Ожидает подтверждения)', color: 'text-amber-700 bg-amber-50 border-amber-200' },
-            'confirmed': { label: '🟢 Подтверждена! Мастер ждёт вас', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-            'completed': { label: '🟣 Процедура выполнена', color: 'text-purple-700 bg-purple-50 border-purple-200' },
-            'cancelled': { label: '⚪ Запись отменена', color: 'text-stone-600 bg-stone-100 border-stone-200' }
-          };
+      // Fallback to localStorage
+      if (records.length === 0) {
+        const stored = localStorage.getItem('angelina_bookings');
+        if (stored) {
+          try {
+            const all = JSON.parse(stored);
+            const cleanDigits = phone.replace(/[^\d]/g, '').slice(-7);
+            if (cleanDigits) {
+              records = all.filter(b => b.phone && b.phone.replace(/[^\d]/g, '').includes(cleanDigits));
+            }
+          } catch(e) {}
+        }
+      }
 
-          let html = '<div class="space-y-3 pt-2">';
-          records.forEach(item => {
-            const st = statusLabels[item.status] || statusLabels['new'];
-            html += `
-              <div class="p-4 rounded-2xl border border-stone-200/90 bg-white shadow-sm space-y-2">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${st.color}">
+      if (records.length > 0) {
+        const statusLabels = {
+          'new': { label: '🟡 В обработке (Ожидает подтверждения)', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+          'confirmed': { label: '🟢 Подтверждена! Мастер ждёт вас', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+          'completed': { label: '🟣 Процедура выполнена', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+          'cancelled': { label: '⚪ Запись отменена', color: 'text-stone-600 bg-stone-100 border-stone-200' }
+        };
+
+        let html = '<div class="space-y-3 pt-2">';
+        records.forEach(item => {
+          const st = statusLabels[item.status] || statusLabels['new'];
+          html += `
+            <div class="p-4 rounded-2xl border border-stone-200 bg-stone-50/70 space-y-2 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-stone-900">№ ${item.id}</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${st.color}">
                   ${st.label}
-                </div>
-                <div class="font-bold text-sm text-stone-900">${item.name}</div>
-                <div class="text-xs text-brand-600 font-semibold">${item.service}</div>
-                <div class="text-xs text-stone-500">📅 ${item.date || 'Дата уточняется'}</div>
-                <div class="pt-2 flex gap-2">
-                  <a href="https://t.me/kuzall" target="_blank" class="flex-1 text-center py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold text-xs transition">
-                    Написать Ангелине
-                  </a>
-                  <a href="tel:+79922821158" class="flex-1 text-center py-2 rounded-xl bg-stone-100 text-stone-800 hover:bg-stone-200 font-semibold text-xs transition">
-                    Позвонить
-                  </a>
-                </div>
+                </span>
               </div>
-            `;
-          });
-          html += '</div>';
-          clientStatusResult.innerHTML = html;
-        } else {
-          clientStatusResult.innerHTML = `
-            <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-center text-xs text-stone-600 space-y-1">
-              <div class="font-bold text-stone-800">Запись не найдена</div>
-              <div>Проверьте правильность номера или оставьте заявку в форме ниже.</div>
+              <div class="font-bold text-sm text-stone-900">${item.name}</div>
+              <div class="text-brand-600 font-semibold">${item.service}</div>
+              <div class="text-stone-500">🕒 ${item.date || 'Дата уточняется'}</div>
+              <div class="text-stone-500">📍 г. Вологда, Центр (ул. Мира)</div>
+              <div class="pt-2 flex gap-2">
+                <a href="https://t.me/kuzall" target="_blank" class="flex-1 text-center py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold text-xs transition">
+                  Написать Ангелине
+                </a>
+                <a href="tel:+79922821158" class="flex-1 text-center py-2 rounded-xl bg-stone-200/70 text-stone-800 hover:bg-stone-300 font-semibold text-xs transition">
+                  Позвонить
+                </a>
+              </div>
             </div>
           `;
-        }
-      });
+        });
+        html += '</div>';
+        statusPanelResults.innerHTML = html;
+      } else {
+        statusPanelResults.innerHTML = `
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-center text-xs text-stone-600 space-y-2">
+            <div class="font-bold text-stone-800">Записей по этому номеру не найдено</div>
+            <p>Проверьте правильность номера или оформите новую запись.</p>
+            <button type="button" onclick="showBookingTab()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition">
+              <span>💅 Оформить запись со скидкой 15%</span>
+            </button>
+          </div>
+        `;
+      }
     }
   </script>
-
-  <!-- Client Status Check Modal -->
-  <div id="client-status-modal" class="hidden fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-md w-full p-6 sm:p-8 relative">
-      <button id="close-client-status-btn" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800 transition">
-        ✕
-      </button>
-
-      <div class="text-center mb-6">
-        <div class="w-12 h-12 mx-auto rounded-full bg-rose-50 text-brand-600 flex items-center justify-center mb-3">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        </div>
-        <h3 class="text-xl font-bold font-serif text-stone-900">Проверить статус записи</h3>
-        <p class="text-xs text-stone-500 mt-1">Введите номер телефона, указанный при записи</p>
-      </div>
-
-      <form id="client-status-form" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона</label>
-          <input type="tel" id="client-phone-search" required placeholder="+7 (999) 000-00-00" class="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-brand-500 font-medium">
-        </div>
-
-        <button type="submit" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-md shadow-brand-500/25 transition text-xs flex items-center justify-center gap-2">
-          <span>Найти мою запись</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-        </button>
-
-        <div id="client-status-result" class="hidden"></div>
-      </form>
-    </div>
-  </div>
-
 </body>
 </html>
