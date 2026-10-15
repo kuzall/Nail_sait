@@ -59,6 +59,21 @@ def get_main_keyboard() -> ReplyKeyboardMarkup:
     ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
+def get_client_keyboard() -> ReplyKeyboardMarkup:
+    site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
+    if not site_url.startswith("http"):
+        site_url = "https://138.249.149.151.sslip.io"
+    kb = [
+        [
+            KeyboardButton(text="💅 Записаться на визит", web_app=WebAppInfo(url=site_url))
+        ],
+        [
+            KeyboardButton(text="📋 Моя запись"),
+            KeyboardButton(text="📍 Адрес и контакты")
+        ]
+    ]
+    return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+
 def get_schedule_picker_kb(rows: list) -> InlineKeyboardMarkup:
     buttons = []
     for idx, b in enumerate(rows, 1):
@@ -170,8 +185,56 @@ def render_booking_card(b: dict) -> str:
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
     user_id = message.from_user.id
-    name = message.from_user.first_name or "Мастер"
+    name = message.from_user.first_name or "Клиент"
     
+    # Check deep link e.g. /start BK-105
+    text_parts = message.text.split() if message.text else []
+    deep_code = text_parts[1].strip() if len(text_parts) > 1 else ""
+
+    if deep_code.startswith("BK-"):
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM bookings WHERE id = ?", (deep_code,))
+        row = cursor.fetchone()
+        if row:
+            b = dict(row)
+            cursor.execute("UPDATE bookings SET client_chat_id = ?, telegram_username = ? WHERE id = ?",
+                           (user_id, message.from_user.username or "", deep_code))
+            conn.commit()
+            conn.close()
+
+            status_icon = {
+                "new": "🟡 Ожидает подтверждения мастером",
+                "confirmed": "🟢 Подтверждена мастером",
+                "completed": "✅ Завершена",
+                "cancelled": "🔴 Отменена"
+            }.get(b["status"], b["status"])
+
+            await message.answer(
+                f"🌸 <b>Здравствуйте, {name}!</b>\n\n"
+                f"✅ Ваша запись <b>№ {b['id']}</b> успешно привязана к Telegram!\n\n"
+                f"━━━━━━━━━━━━━━━━━━\n"
+                f"💅 <b>Услуга:</b> {b['service']}\n"
+                f"🕒 <b>Дата и время:</b> <b>{b['date']}</b>\n"
+                f"📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира)\n"
+                f"Статус: <b>{status_icon}</b>\n"
+                f"━━━━━━━━━━━━━━━━━━\n\n"
+                f"🔔 <i>Теперь вы будете получать мгновенные уведомления о статусе вашего визита прямо сюда в чат!</i>",
+                reply_markup=get_client_keyboard()
+            )
+
+            # Alert admin
+            for admin_id in ADMIN_IDS:
+                try:
+                    await bot.send_message(
+                        chat_id=admin_id,
+                        text=f"📱 Клиент <b>{name}</b> привязал Telegram к записи <b>№ {b['id']}</b> ({b['name']}). Теперь бот уведомит его при подтверждении."
+                    )
+                except Exception:
+                    pass
+            return
+        conn.close()
+
     if user_id in ADMIN_IDS:
         await message.answer(
             f"👋 <b>Привет, {name}!</b>\n\n"
@@ -182,13 +245,71 @@ async def cmd_start(message: Message):
             reply_markup=get_main_keyboard()
         )
     else:
+        site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
+        if not site_url.startswith("http"):
+            site_url = "https://138.249.149.151.sslip.io"
         await message.answer(
             f"Здравствуйте, {name}! 🌸\n\n"
-            f"Это бот студии ногтевого сервиса <b>Ангелины</b> в Вологде.\n\n"
-            f"Вы можете записаться на идеальный маникюр на нашем сайте:\n"
-            f"👉 https://138.249.149.151.sslip.io/\n\n"
-            f"<i>Ваш ID: <code>{user_id}</code></i>"
+            f"Добро пожаловать в студию ногтевого сервиса <b>Ангелины Осиной</b> в Вологде.\n\n"
+            f"Здесь вы можете записаться на процедуру, а также отслеживать статус своих визитов.\n\n"
+            f"<i>Выберите нужное действие в меню ниже:</i>",
+            reply_markup=get_client_keyboard()
         )
+
+@dp.message(F.text == "📋 Моя запись")
+async def cmd_my_booking(message: Message):
+    user_id = message.from_user.id
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM bookings 
+        WHERE client_chat_id = ? 
+        ORDER BY created_at DESC LIMIT 3
+    """, (user_id,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+
+    if not rows:
+        await message.answer(
+            "📋 <b>У вас пока нет активных записей, привязанных к этому Telegram.</b>\n\n"
+            "Вы можете записаться прямо сейчас, нажав кнопку «💅 Записаться на визит», "
+            "или если вы уже записались на сайте — перейдите по ссылке в электронном талоне на сайте.",
+            reply_markup=get_client_keyboard()
+        )
+        return
+
+    lines = ["🌸 <b>Ваши записи в студию Ангелины:</b>\n"]
+    for idx, b in enumerate(rows, 1):
+        status_icon = {
+            "new": "🟡 Ожидает подтверждения",
+            "confirmed": "🟢 Подтверждена мастером",
+            "completed": "✅ Завершена",
+            "cancelled": "🔴 Отменена"
+        }.get(b["status"], b["status"])
+
+        lines.append(
+            f"<b>{idx}. Запись № {b['id']}</b>\n"
+            f"💅 Услуга: {b['service']}\n"
+            f"🕒 Время: <b>{b['date']}</b>\n"
+            f"Статус: <b>{status_icon}</b>\n"
+            f"📍 г. Вологда, Центр (ул. Мира)\n"
+        )
+        if idx < len(rows):
+            lines.append("────────────────────")
+    lines.append("\n<i>По вопросам переноса или отмены напишите мастеру в мессенджер MAX: +7 (992) 282-11-58</i>")
+    await message.answer("\n".join(lines), reply_markup=get_client_keyboard())
+
+@dp.message(F.text == "📍 Адрес и контакты")
+async def cmd_contacts(message: Message):
+    await message.answer(
+        "🌸 <b>Студия ногтевого сервиса Ангелины Осиной</b>\n\n"
+        "📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира / Батюшкова)\n"
+        "🕒 <b>График работы:</b> Ежедневно: 09:00 — 21:00\n"
+        "📱 <b>Телефон / Мессенджер MAX:</b> <code>+7 (992) 282-11-58</code>\n"
+        "✈️ <b>Telegram мастера:</b> @kuzall\n\n"
+        "<i>Уютная студия в центре Вологды, стерильные инструменты и авторский уход.</i>",
+        reply_markup=get_client_keyboard()
+    )
 
 @dp.message(F.text == "📅 Записи на сегодня")
 @dp.message(Command("today"))
@@ -425,6 +546,22 @@ async def on_shift_action(callback: CallbackQuery):
         f"<i>Статус обновлён в календаре на сайте и в базе.</i>"
     )
 
+    client_id = b.get("client_chat_id")
+    if client_id:
+        try:
+            await bot.send_message(
+                chat_id=client_id,
+                text=(
+                    f"🔄 <b>Время вашего визита изменено мастером:</b>\n\n"
+                    f"💅 <b>Услуга:</b> {b['service']}\n"
+                    f"🕒 <b>Новое время:</b> <b>{new_date}</b>\n"
+                    f"📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира)\n\n"
+                    f"<i>Если у вас изменились планы, напишите мастеру в MAX: +7 (992) 282-11-58</i>"
+                )
+            )
+        except Exception:
+            pass
+
 # ==================== STATUS ACTIONS ====================
 @dp.callback_query(F.data.startswith("conf:"))
 async def on_confirm(callback: CallbackQuery):
@@ -445,6 +582,23 @@ async def on_confirm(callback: CallbackQuery):
             render_booking_card(b),
             reply_markup=get_booking_actions_kb(b["id"], b["phone"], "confirmed")
         )
+
+        client_id = b.get("client_chat_id")
+        if client_id:
+            try:
+                await bot.send_message(
+                    chat_id=client_id,
+                    text=(
+                        f"🎉 <b>Ваша запись подтверждена мастером!</b>\n\n"
+                        f"🌸 Мастер: <b>Ангелина Осина</b>\n"
+                        f"💅 Услуга: <b>{b['service']}</b>\n"
+                        f"🕒 Дата и время: <b>{b['date']}</b>\n"
+                        f"📍 Адрес: <b>г. Вологда, Центр (ул. Мира / Батюшкова)</b>\n\n"
+                        f"Ждём вас на идеальный маникюр! ✨"
+                    )
+                )
+            except Exception:
+                pass
     else:
         await callback.answer("Запись не найдена", show_alert=True)
 
@@ -467,6 +621,21 @@ async def on_cancel(callback: CallbackQuery):
             render_booking_card(b),
             reply_markup=get_booking_actions_kb(b["id"], b["phone"], "cancelled")
         )
+
+        client_id = b.get("client_chat_id")
+        if client_id:
+            try:
+                site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
+                await bot.send_message(
+                    chat_id=client_id,
+                    text=(
+                        f"❌ <b>Запись отменена</b>\n\n"
+                        f"Ваша запись на <b>{b['date']}</b> ({b['service']}) была отменена.\n"
+                        f"Вы можете выбрать другое удобное время: {site_url}"
+                    )
+                )
+            except Exception:
+                pass
     else:
         await callback.answer("Запись не найдена", show_alert=True)
 

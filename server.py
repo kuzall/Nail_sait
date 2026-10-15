@@ -147,6 +147,25 @@ def send_telegram_booking_alert(booking):
         except Exception as e:
             print(f"Failed to send Telegram notification to {chat_id}: {e}")
 
+def notify_telegram_client(client_chat_id, text):
+    if not client_chat_id or not TELEGRAM_BOT_TOKEN:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    try:
+        payload = {
+            "chat_id": client_chat_id,
+            "text": text,
+            "parse_mode": "HTML"
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"Failed to send Telegram notification to client {client_chat_id}: {e}")
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -165,10 +184,27 @@ def init_db():
         date TEXT NOT NULL,
         status TEXT DEFAULT 'new',
         notes TEXT DEFAULT '',
+        slot_date TEXT DEFAULT '',
+        slot_time TEXT DEFAULT '',
+        client_chat_id INTEGER DEFAULT 0,
+        telegram_username TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
     
+    # Auto-migrate existing columns if table already existed
+    cursor.execute("PRAGMA table_info(bookings)")
+    existing_cols = [c[1] for c in cursor.fetchall()]
+    new_cols = [
+        ("slot_date", "TEXT DEFAULT ''"),
+        ("slot_time", "TEXT DEFAULT ''"),
+        ("client_chat_id", "INTEGER DEFAULT 0"),
+        ("telegram_username", "TEXT DEFAULT ''")
+    ]
+    for col_name, col_type in new_cols:
+        if col_name not in existing_cols:
+            cursor.execute(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}")
+
     # Check if empty, add sample demo bookings
     cursor.execute("SELECT COUNT(*) as count FROM bookings")
     count = cursor.fetchone()["count"]
@@ -183,7 +219,7 @@ def init_db():
         INSERT INTO bookings (id, name, phone, service, price, date, status, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, demo_bookings)
-        conn.commit()
+    conn.commit()
     conn.close()
 
 class AppHandler(SimpleHTTPRequestHandler):
@@ -221,6 +257,83 @@ class AppHandler(SimpleHTTPRequestHandler):
             rows = [dict(row) for row in cursor.fetchall()]
             conn.close()
             return self.send_json({"success": True, "bookings": rows})
+
+        # API: Available slots for date
+        elif path == "/api/available-slots":
+            target_date = params.get("date", [""])[0].strip()
+            if not target_date:
+                target_date = datetime.now().strftime("%Y-%m-%d")
+
+            standard_slots = ["10:00", "12:30", "15:00", "17:30", "20:00"]
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT slot_time, date FROM bookings 
+                WHERE (slot_date = ? OR date LIKE ?) AND status != 'cancelled'
+            """, (target_date, f"%{target_date}%"))
+            rows = cursor.fetchall()
+            conn.close()
+
+            booked_times = set()
+            for r in rows:
+                if r["slot_time"]:
+                    booked_times.add(r["slot_time"])
+                else:
+                    for s in standard_slots:
+                        if s in r["date"]:
+                            booked_times.add(s)
+
+            now = datetime.now()
+            today_str = now.strftime("%Y-%m-%d")
+            cur_time_str = now.strftime("%H:%M")
+
+            slot_list = []
+            for s in standard_slots:
+                is_past = (target_date == today_str and s <= cur_time_str)
+                is_avail = (s not in booked_times) and (not is_past)
+                slot_list.append({
+                    "time": s,
+                    "available": is_avail,
+                    "reason": "past" if is_past else ("booked" if s in booked_times else "open")
+                })
+
+            return self.send_json({
+                "success": True,
+                "date": target_date,
+                "slots": slot_list
+            })
+
+        # API: Single booking status check for client live tracking
+        elif path == "/api/booking/status":
+            booking_id = params.get("id", [""])[0].strip()
+            if not booking_id:
+                return self.send_json({"success": False, "error": "ID обязателен"}, 400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM bookings WHERE id = ?", (booking_id,))
+            row = cursor.fetchone()
+            conn.close()
+
+            if row:
+                b = dict(row)
+                return self.send_json({
+                    "success": True,
+                    "booking": {
+                        "id": b["id"],
+                        "name": b["name"],
+                        "service": b["service"],
+                        "price": b["price"],
+                        "date": b["date"],
+                        "status": b["status"],
+                        "notes": b["notes"],
+                        "slot_date": b.get("slot_date", ""),
+                        "slot_time": b.get("slot_time", ""),
+                        "client_chat_id": b.get("client_chat_id", 0)
+                    }
+                })
+            else:
+                return self.send_json({"success": False, "error": "Запись не найдена"}, 404)
 
         # API: Client lookup by phone
         elif path == "/api/client/status":
@@ -278,22 +391,56 @@ class AppHandler(SimpleHTTPRequestHandler):
             name, phone = val_result
             service = payload.get("service", "Маникюр")
             notes = payload.get("notes", "Заявка с сайта")
-            date = payload.get("date", "Сегодня, " + datetime.now().strftime("%H:%M"))
+            slot_date = payload.get("slot_date", "").strip()
+            slot_time = payload.get("slot_time", "").strip()
+            telegram_username = payload.get("telegram_username", "").strip()
+            client_chat_id = payload.get("client_chat_id", 0)
             status = payload.get("status", "new")
+
+            # Check for conflict if specific slot was chosen
+            if slot_date and slot_time:
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT COUNT(*) as cnt FROM bookings 
+                    WHERE slot_date = ? AND slot_time = ? AND status != 'cancelled'
+                """, (slot_date, slot_time))
+                if cursor.fetchone()["cnt"] > 0:
+                    conn.close()
+                    return self.send_json({
+                        "success": False, 
+                        "error": "Это время уже занято другим клиентом. Пожалуйста, выберите другое свободное окошко."
+                    }, 409)
+                conn.close()
+
+            # Format human-friendly date string
+            date = payload.get("date", "").strip()
+            if not date:
+                if slot_date and slot_time:
+                    try:
+                        dt = datetime.strptime(slot_date, "%Y-%m-%d")
+                        months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+                        weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+                        m_str = months[dt.month - 1]
+                        w_str = weekdays[dt.weekday()]
+                        date = f"{dt.day} {m_str} ({w_str}), {slot_time}"
+                    except Exception:
+                        date = f"{slot_date}, {slot_time}"
+                else:
+                    date = "Сегодня, " + datetime.now().strftime("%H:%M")
 
             booking_id = "BK-" + str(random.randint(100, 999))
             
             # Extract price if present in service string
-            import re
             match = re.search(r'(\d[\d\s]*)\s*₽', service)
             price = int(match.group(1).replace(" ", "")) if match else 2500
 
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute("""
-            INSERT INTO bookings (id, name, phone, service, price, date, status, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (booking_id, name, phone, service, price, date, status, notes))
+            INSERT INTO bookings (id, name, phone, service, price, date, status, notes, slot_date, slot_time, client_chat_id, telegram_username)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (booking_id, name, phone, service, price, date, status, notes, slot_date, slot_time, client_chat_id, telegram_username))
             conn.commit()
 
             cursor.execute("SELECT * FROM bookings WHERE id = ?", (booking_id,))
@@ -314,10 +461,38 @@ class AppHandler(SimpleHTTPRequestHandler):
             conn = get_db()
             cursor = conn.cursor()
             if "status" in payload:
-                cursor.execute("UPDATE bookings SET status = ? WHERE id = ?", (payload["status"], booking_id))
+                new_status = payload["status"]
+                cursor.execute("UPDATE bookings SET status = ? WHERE id = ?", (new_status, booking_id))
+                conn.commit()
+
+                # Trigger automated notification to client if client_chat_id is linked
+                cursor.execute("SELECT * FROM bookings WHERE id = ?", (booking_id,))
+                b_row = cursor.fetchone()
+                if b_row:
+                    b = dict(b_row)
+                    client_id = b.get("client_chat_id")
+                    if client_id:
+                        if new_status == "confirmed":
+                            msg = (
+                                f"🎉 <b>Ваша запись подтверждена!</b>\n\n"
+                                f"🌸 Мастер: <b>Ангелина Осина</b>\n"
+                                f"💅 Услуга: <b>{b.get('service')}</b>\n"
+                                f"🕒 Дата и время: <b>{b.get('date')}</b>\n"
+                                f"📍 Адрес: <b>г. Вологда, Центр (ул. Мира)</b>\n\n"
+                                f"Ждём вас на идеальный маникюр! ✨"
+                            )
+                            threading.Thread(target=notify_telegram_client, args=(client_id, msg), daemon=True).start()
+                        elif new_status == "cancelled":
+                            msg = (
+                                f"❌ <b>Запись отменена</b>\n\n"
+                                f"Ваша запись на <b>{b.get('date')}</b> ({b.get('service')}) была отменена.\n"
+                                f"Вы можете выбрать другое удобное время на сайте."
+                            )
+                            threading.Thread(target=notify_telegram_client, args=(client_id, msg), daemon=True).start()
+
             if "notes" in payload:
                 cursor.execute("UPDATE bookings SET notes = ? WHERE id = ?", (payload["notes"], booking_id))
-            conn.commit()
+                conn.commit()
             conn.close()
             return self.send_json({"success": True})
 

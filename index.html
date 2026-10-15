@@ -1107,40 +1107,84 @@
             </div>
 
             <!-- Booking form -->
+            <!-- Booking form & Interactive Voucher -->
             <div class="lg:col-span-5">
+              <!-- 1. The Interactive Booking Form -->
               <form id="contact-form" class="bg-white text-stone-800 p-6 sm:p-8 rounded-3xl shadow-xl space-y-4">
-                <h3 class="text-xl font-bold font-serif text-stone-900">Быстрая запись</h3>
-                <p class="text-xs text-stone-500">Заполните форму, и мастер свяжется с вами в течение 10 минут</p>
-
-                <div>
-                  <label class="block text-xs font-semibold text-stone-700 mb-1">Ваше имя</label>
-                  <input type="text" id="client-name" required placeholder="Например, Екатерина" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-xl font-bold font-serif text-stone-900">Быстрая запись</h3>
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">-15% скидка</span>
                 </div>
+                <p class="text-xs text-stone-500">Выберите процедуру, удобную дату и время визита</p>
 
+                <!-- Service selector -->
                 <div>
-                  <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона / Telegram / MAX</label>
-                  <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-stone-700 mb-1">Интересующая услуга</label>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">1. Интересующая услуга</label>
                   <select id="service-select" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm bg-white font-medium text-stone-800">
-                    <option value="Маникюр + гель-лак">Маникюр + гель-лак (3 200 ₽) — Хит</option>
-                    <option value="Маникюр + укрепление">Маникюр + укрепление (3 700 ₽) — Самый стойкий</option>
-                    <option value="Маникюр без покрытия">Маникюр без покрытия (1 900 ₽)</option>
-                    <option value="Маникюр с дизайном">Маникюр с дизайном (4 200 ₽)</option>
-                    <option value="Smart-педикюр">Smart-педикюр полный (2 300 ₽)</option>
-                    <option value="Другое / Нужна консультация">Другое / Нужна консультация</option>
+                    <option value="Маникюр + гель-лак (3 200 ₽)">Маникюр + гель-лак (3 200 ₽) — Хит</option>
+                    <option value="Маникюр + укрепление (3 700 ₽)">Маникюр + укрепление (3 700 ₽) — Самый стойкий</option>
+                    <option value="Маникюр без покрытия (1 900 ₽)">Маникюр без покрытия (1 900 ₽)</option>
+                    <option value="Маникюр с дизайном (4 200 ₽)">Маникюр с дизайном (4 200 ₽)</option>
+                    <option value="Smart-педикюр (2 300 ₽)">Smart-педикюр полный (2 300 ₽)</option>
+                    <option value="Другое / Консультация">Другое / Нужна консультация</option>
                   </select>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-lg shadow-brand-500/25 transition-all text-sm">
-                  Отправить заявку со скидкой 15%
+                <!-- Date picker pills -->
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-semibold text-stone-700">2. Выберите дату</label>
+                    <span id="selected-date-label" class="text-[11px] font-medium text-brand-600"></span>
+                  </div>
+                  <div id="date-pills-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                    <!-- Dynamic Date Buttons rendered by JS -->
+                  </div>
+                  <input type="hidden" id="slot-date" name="slot_date" value="">
+                </div>
+
+                <!-- Time slots picker -->
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-semibold text-stone-700">3. Свободное время</label>
+                    <span id="slot-loading-indicator" class="hidden text-[11px] text-stone-400">Обновление...</span>
+                  </div>
+                  <div id="time-slots-container" class="grid grid-cols-5 gap-2">
+                    <!-- Dynamic Slot Buttons rendered by JS -->
+                  </div>
+                  <input type="hidden" id="slot-time" name="slot_time" value="">
+                </div>
+
+                <!-- Client Info: Name & Phone -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label class="block text-xs font-semibold text-stone-700 mb-1">Ваше имя</label>
+                    <input type="text" id="client-name" required placeholder="Екатерина" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-stone-700 mb-1">Номер телефона</label>
+                    <input type="tel" id="client-phone" required placeholder="+7 (999) 000-00-00" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-sm">
+                  </div>
+                </div>
+
+                <!-- Telegram username (optional) -->
+                <div>
+                  <label class="block text-xs font-semibold text-stone-700 mb-1">
+                    Telegram для уведомлений <span class="text-stone-400 font-normal">(по желанию)</span>
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-stone-400 text-sm">@</span>
+                    <input type="text" id="client-tg" placeholder="username" class="w-full pl-8 pr-3.5 py-2 rounded-xl border border-stone-200 focus:outline-none focus:border-brand-500 text-xs">
+                  </div>
+                </div>
+
+                <button type="submit" id="submit-booking-btn" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-brand-600 to-rose-500 hover:from-brand-700 hover:to-rose-600 shadow-lg shadow-brand-500/25 transition-all text-sm flex items-center justify-center gap-2">
+                  <span>Записаться со скидкой 15%</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
                 <p class="text-[10px] text-center text-stone-400">Нажимая кнопку, вы соглашаетесь на обработку персональных данных</p>
 
                 <!-- Check booking status button for clients -->
-                <div class="pt-3 text-center border-t border-stone-100">
+                <div class="pt-2 text-center border-t border-stone-100">
                   <button type="button" id="open-client-status-btn" class="text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline inline-flex items-center gap-1.5 transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     <span>Уже записались? Проверить статус записи</span>
@@ -1152,20 +1196,83 @@
 
                 <!-- Error notification box -->
                 <div id="form-error" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium"></div>
+              </form>
 
-                <!-- Success notification box -->
-                <div id="form-success" class="hidden p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2">
-                  <div class="font-bold flex items-center gap-1.5 text-sm">
-                    <span>✓</span> Заявка успешно отправлена!
+              <!-- 2. Electronic Voucher (Талон бронирования с живым статусом) -->
+              <div id="booking-voucher" class="hidden bg-white text-stone-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-5 border-2 border-rose-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-rose-100/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex items-center justify-between border-b border-stone-100 pb-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 text-sm font-serif font-bold">A</div>
+                    <div>
+                      <h4 class="font-bold text-sm text-stone-900 leading-tight">Angelina Studio</h4>
+                      <div class="text-[11px] text-stone-400">Электронный талон записи</div>
+                    </div>
                   </div>
-                  <div>Ангелина свяжется с вами в Telegram или по телефону в ближайшее время для подтверждения времени.</div>
-                  <div class="pt-1">
-                    <a href="https://t.me/kuzall" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2AABEE] hover:underline">
-                      <span>Написать мастеру в Telegram напрямую →</span>
-                    </a>
+                  <span id="voucher-code" class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-stone-900 text-white">#BK---</span>
+                </div>
+
+                <!-- Live Status Banner -->
+                <div id="voucher-status-card" class="p-4 rounded-2xl bg-amber-50 border border-amber-200/80 transition-all duration-500">
+                  <div class="flex items-center justify-between mb-1">
+                    <span id="voucher-status-pill" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white text-amber-800 shadow-sm border border-amber-200">
+                      <span id="voucher-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                      <span id="voucher-status-text">Ожидает подтверждения мастером</span>
+                    </span>
+                    <span id="voucher-live-indicator" class="text-[10px] font-semibold text-stone-400 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live
+                    </span>
+                  </div>
+                  <p id="voucher-status-desc" class="text-xs text-amber-900/90 mt-2">
+                    Ангелина получила вашу заявку в Telegram. Как только мастер подтвердит окошко, этот статус обновится на экране в реальном времени!
+                  </p>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="bg-stone-50 rounded-2xl p-4 space-y-2.5 text-xs">
+                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                    <span class="text-stone-500">💅 Услуга:</span>
+                    <span id="voucher-service" class="font-bold text-stone-900 text-right"></span>
+                  </div>
+                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                    <span class="text-stone-500">🕒 Дата и время:</span>
+                    <span id="voucher-datetime" class="font-bold text-brand-700 text-right"></span>
+                  </div>
+                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                    <span class="text-stone-500">💵 Стоимость:</span>
+                    <span id="voucher-price" class="font-bold text-emerald-700 text-right"></span>
+                  </div>
+                  <div class="flex justify-between items-center py-1 border-b border-stone-200/50">
+                    <span class="text-stone-500">👤 Клиент:</span>
+                    <span id="voucher-client" class="font-semibold text-stone-800 text-right"></span>
+                  </div>
+                  <div class="flex justify-between items-center pt-1">
+                    <span class="text-stone-500">📍 Локация:</span>
+                    <span class="font-semibold text-stone-800 text-right">г. Вологда, Центр (ул. Мира)</span>
                   </div>
                 </div>
-              </form>
+
+                <!-- Action buttons -->
+                <div class="space-y-2 pt-1">
+                  <!-- Telegram notification button -->
+                  <a id="voucher-tg-link" href="https://t.me/kuzall" target="_blank" class="w-full py-3 px-4 rounded-xl font-semibold text-white bg-[#2AABEE] hover:bg-[#229ED9] transition shadow flex items-center justify-center gap-2 text-xs">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.37.75-.56 2.93-1.27 4.88-2.11 5.86-2.52 2.79-1.16 3.37-1.36 3.75-1.36.08 0 .28.02.4.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
+                    <span>Получать уведомления о визите в Telegram</span>
+                  </a>
+
+                  <!-- Google Calendar button -->
+                  <a id="voucher-calendar-btn" href="#" target="_blank" class="w-full py-2.5 px-4 rounded-xl font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition flex items-center justify-center gap-2 text-xs">
+                    <svg class="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>Добавить визит в Google Календарь</span>
+                  </a>
+
+                  <!-- Return button -->
+                  <button type="button" id="voucher-new-booking-btn" class="w-full text-center text-[11px] font-semibold text-stone-400 hover:text-stone-600 pt-2 transition">
+                    Оформить ещё одну запись →
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1276,16 +1383,159 @@
       });
     }
 
-    // Form Submission Handling with Anti-Spam & Validation
+    // 4. Interactive Date Pills and Slot Selector Logic
+    const datePillsContainer = document.getElementById('date-pills-container');
+    const timeSlotsContainer = document.getElementById('time-slots-container');
+    const slotDateInput = document.getElementById('slot-date');
+    const slotTimeInput = document.getElementById('slot-time');
+    const selectedDateLabel = document.getElementById('selected-date-label');
+    const slotLoadingIndicator = document.getElementById('slot-loading-indicator');
+
+    const monthsRu = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    const daysRu = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+    function initDatePills() {
+      if (!datePillsContainer) return;
+      datePillsContainer.innerHTML = '';
+
+      const today = new Date();
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+
+        const isoDate = d.toISOString().split('T')[0];
+        let dayTitle = '';
+        if (i === 0) dayTitle = 'Сегодня';
+        else if (i === 1) dayTitle = 'Завтра';
+        else dayTitle = daysRu[d.getDay()];
+
+        const dateSub = d.getDate() + ' ' + monthsRu[d.month || d.getMonth()];
+
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = `date-pill flex-shrink-0 px-3.5 py-2 rounded-2xl border text-center transition-all ${
+          i === 0 
+            ? 'bg-gradient-to-r from-brand-600 to-rose-500 text-white border-transparent shadow-md font-bold' 
+            : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200 font-medium'
+        }`;
+        pill.innerHTML = `
+          <div class="text-[10px] uppercase tracking-wider ${i === 0 ? 'text-rose-100' : 'text-stone-400'}">${dayTitle}</div>
+          <div class="text-xs font-bold whitespace-nowrap mt-0.5">${dateSub}</div>
+        `;
+
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.date-pill').forEach(p => {
+            p.className = 'date-pill flex-shrink-0 px-3.5 py-2 rounded-2xl border text-center transition-all bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200 font-medium';
+            const first = p.querySelector('div:first-child');
+            if (first) first.className = 'text-[10px] uppercase tracking-wider text-stone-400';
+          });
+          pill.className = 'date-pill flex-shrink-0 px-3.5 py-2 rounded-2xl border text-center transition-all bg-gradient-to-r from-brand-600 to-rose-500 text-white border-transparent shadow-md font-bold';
+          const first = pill.querySelector('div:first-child');
+          if (first) first.className = 'text-[10px] uppercase tracking-wider text-rose-100';
+
+          selectDate(isoDate, `${dayTitle}, ${dateSub}`);
+        });
+
+        datePillsContainer.appendChild(pill);
+      }
+
+      // Initial selection: today
+      const todayIso = today.toISOString().split('T')[0];
+      selectDate(todayIso, `Сегодня, ${today.getDate()} ${monthsRu[today.getMonth()]}`);
+    }
+
+    function selectDate(isoDate, readableLabel) {
+      if (slotDateInput) slotDateInput.value = isoDate;
+      if (selectedDateLabel) selectedDateLabel.textContent = readableLabel;
+      loadAvailableSlots(isoDate);
+    }
+
+    async function loadAvailableSlots(isoDate) {
+      if (!timeSlotsContainer) return;
+      if (slotLoadingIndicator) slotLoadingIndicator.classList.remove('hidden');
+
+      timeSlotsContainer.innerHTML = '<div class="col-span-5 text-center py-2 text-stone-400 text-xs">Загрузка окон...</div>';
+
+      try {
+        const res = await fetch('/api/available-slots?date=' + encodeURIComponent(isoDate));
+        const data = await res.json();
+        if (slotLoadingIndicator) slotLoadingIndicator.classList.add('hidden');
+
+        if (data.success && data.slots) {
+          timeSlotsContainer.innerHTML = '';
+          let firstAvailableSelected = false;
+
+          data.slots.forEach(s => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = s.time;
+
+            if (!s.available) {
+              btn.disabled = true;
+              btn.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-semibold bg-stone-100 text-stone-300 border border-stone-100 cursor-not-allowed line-through';
+              btn.title = s.reason === 'past' ? 'Время уже прошло' : 'Окошко занято';
+            } else {
+              btn.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200 transition-all';
+              
+              btn.addEventListener('click', () => {
+                document.querySelectorAll('.slot-btn:not([disabled])').forEach(b => {
+                  b.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200 transition-all';
+                });
+                btn.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-900 text-white border-stone-900 shadow-md transition-all scale-105';
+                if (slotTimeInput) slotTimeInput.value = s.time;
+              });
+
+              if (!firstAvailableSelected) {
+                // Pre-select first free slot
+                btn.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-900 text-white border-stone-900 shadow-md transition-all scale-105';
+                if (slotTimeInput) slotTimeInput.value = s.time;
+                firstAvailableSelected = true;
+              }
+            }
+
+            timeSlotsContainer.appendChild(btn);
+          });
+
+          if (!firstAvailableSelected && slotTimeInput) {
+            slotTimeInput.value = '';
+          }
+        }
+      } catch (err) {
+        if (slotLoadingIndicator) slotLoadingIndicator.classList.add('hidden');
+        // Fallback default slots
+        const defaultSlots = ['10:00', '12:30', '15:00', '17:30', '20:00'];
+        timeSlotsContainer.innerHTML = '';
+        defaultSlots.forEach((t, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = t;
+          btn.className = idx === 0 
+            ? 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-900 text-white border-stone-900 shadow-md' 
+            : 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200';
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.slot-btn').forEach(b => b.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200');
+            btn.className = 'slot-btn py-2 px-1 rounded-xl text-xs font-bold bg-stone-900 text-white border-stone-900 shadow-md';
+            if (slotTimeInput) slotTimeInput.value = t;
+          });
+          timeSlotsContainer.appendChild(btn);
+        });
+        if (slotTimeInput) slotTimeInput.value = defaultSlots[0];
+      }
+    }
+
+    // Initialize date selector on page load
+    initDatePills();
+
+    // 5. Form Submission Handling with Anti-Spam, Validation & Live Voucher
     const contactForm = document.getElementById('contact-form');
-    const formSuccess = document.getElementById('form-success');
     const formError = document.getElementById('form-error');
+    const bookingVoucher = document.getElementById('booking-voucher');
+    let liveStatusPollInterval = null;
 
     if (contactForm) {
       contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (formError) formError.classList.add('hidden');
-        if (formSuccess) formSuccess.classList.add('hidden');
 
         // Check Honeypot for bots
         const honeypot = document.getElementById('honeypot-field');
@@ -1296,7 +1546,11 @@
         const name = (clientNameInput ? clientNameInput.value : '').trim();
         const phone = (clientPhoneInput ? clientPhoneInput.value : '').trim();
         const service = document.getElementById('service-select').value;
-        
+        const slotDate = (slotDateInput ? slotDateInput.value : '').trim();
+        const slotTime = (slotTimeInput ? slotTimeInput.value : '').trim();
+        const clientTgInput = document.getElementById('client-tg');
+        const telegramUsername = clientTgInput ? clientTgInput.value.replace(/^@/, '').trim() : '';
+
         // 1. Frontend Name Validation
         if (name.length < 2) {
           formError.textContent = 'Пожалуйста, введите ваше настоящее имя (минимум 2 буквы)';
@@ -1321,42 +1575,174 @@
           return;
         }
 
-        // 3. Send to Backend SQLite API
+        // 3. Slot validation
+        if (!slotTime) {
+          formError.textContent = 'Пожалуйста, выберите свободное время визита';
+          formError.classList.remove('hidden');
+          return;
+        }
+
+        const submitBtn = document.getElementById('submit-booking-btn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span>Отправка заявки...</span>';
+        }
+
+        let createdBooking = null;
+
+        // 4. Send to Backend SQLite API
         try {
           const resp = await fetch('/api/bookings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, phone, service, notes: 'Заявка с сайта' })
+            body: JSON.stringify({
+              name,
+              phone,
+              service,
+              slot_date: slotDate,
+              slot_time: slotTime,
+              telegram_username: telegramUsername,
+              notes: telegramUsername ? `TG: @${telegramUsername}` : 'Заявка с сайта'
+            })
           });
           const result = await resp.json();
           if (!resp.ok || !result.success) {
             formError.textContent = result.error || 'Ошибка при отправке заявки. Проверьте данные.';
             formError.classList.remove('hidden');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<span>Записаться со скидкой 15%</span>';
+            }
             return;
           }
+          createdBooking = result.booking;
         } catch (err) {
           console.warn('API submission fallback:', err);
+          createdBooking = {
+            id: 'BK-' + Math.floor(100 + Math.random() * 900),
+            name,
+            phone,
+            service,
+            date: `${slotDate}, ${slotTime}`,
+            price: 2720,
+            status: 'new'
+          };
         }
 
-        // 4. Backup to localStorage for instant local view
+        // 5. Backup to localStorage for instant local view
         try {
           const stored = localStorage.getItem('angelina_bookings');
           let bookings = stored ? JSON.parse(stored) : [];
-          const newBooking = {
-            id: 'BK-' + Math.floor(100 + Math.random() * 900),
-            name, phone, service,
-            date: 'Сегодня, ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-            status: 'new',
-            notes: 'Заявка с сайта'
-          };
-          bookings.unshift(newBooking);
+          bookings.unshift(createdBooking);
           localStorage.setItem('angelina_bookings', JSON.stringify(bookings));
         } catch (e) {}
 
-        if (formSuccess) {
-          formSuccess.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Записаться со скидкой 15%</span>';
         }
-        contactForm.reset();
+
+        // 6. Transition to Electronic Voucher with Live Status Tracking
+        showElectronicVoucher(createdBooking);
+      });
+    }
+
+    function showElectronicVoucher(b) {
+      if (!contactForm || !bookingVoucher) return;
+      contactForm.classList.add('hidden');
+      bookingVoucher.classList.remove('hidden');
+
+      // Populate voucher elements
+      const codeEl = document.getElementById('voucher-code');
+      const serviceEl = document.getElementById('voucher-service');
+      const datetimeEl = document.getElementById('voucher-datetime');
+      const priceEl = document.getElementById('voucher-price');
+      const clientEl = document.getElementById('voucher-client');
+      const tgLinkEl = document.getElementById('voucher-tg-link');
+      const calBtnEl = document.getElementById('voucher-calendar-btn');
+
+      if (codeEl) codeEl.textContent = `№ ${b.id}`;
+      if (serviceEl) serviceEl.textContent = b.service;
+      if (datetimeEl) datetimeEl.textContent = b.date;
+      
+      const priceVal = b.price || 3000;
+      const discounted = Math.round(priceVal * 0.85);
+      if (priceEl) priceEl.textContent = `${discounted.toLocaleString('ru-RU')} ₽ (со скидкой 15%)`;
+      if (clientEl) clientEl.textContent = `${b.name} • ${b.phone}`;
+
+      // Update Telegram link with deep code so client can bind notifications
+      if (tgLinkEl) {
+        tgLinkEl.href = `https://t.me/kuzall?text=Здравствуйте,+Ангелина!+Я+записалась+на+сайте+(№+${b.id},+${encodeURIComponent(b.date)})`;
+      }
+
+      // Update Google Calendar button
+      if (calBtnEl) {
+        const calTitle = encodeURIComponent(`Маникюр: Angelina Studio (${b.service})`);
+        const calDetails = encodeURIComponent(`Запись в студию Ангелины Осиной.\nНомер брони: ${b.id}\nАдрес: г. Вологда, ул. Мира.\nТелефон мастера: +7 (992) 282-11-58`);
+        const calLoc = encodeURIComponent('г. Вологда, ул. Мира');
+        calBtnEl.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calTitle}&details=${calDetails}&location=${calLoc}`;
+      }
+
+      // Start Live Polling for Master's Confirmation
+      startLiveStatusPolling(b.id);
+    }
+
+    function startLiveStatusPolling(bookingId) {
+      if (liveStatusPollInterval) clearInterval(liveStatusPollInterval);
+
+      liveStatusPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/api/booking/status?id=' + encodeURIComponent(bookingId));
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.success && data.booking) {
+            const curStatus = data.booking.status;
+            updateVoucherStatusUI(curStatus);
+            if (curStatus === 'confirmed' || curStatus === 'cancelled' || curStatus === 'completed') {
+              clearInterval(liveStatusPollInterval);
+            }
+          }
+        } catch (e) {}
+      }, 4000);
+    }
+
+    function updateVoucherStatusUI(status) {
+      const card = document.getElementById('voucher-status-card');
+      const pill = document.getElementById('voucher-status-pill');
+      const dot = document.getElementById('voucher-status-dot');
+      const text = document.getElementById('voucher-status-text');
+      const desc = document.getElementById('voucher-status-desc');
+
+      if (!card || !pill || !text || !desc) return;
+
+      if (status === 'confirmed') {
+        card.className = 'p-4 rounded-2xl bg-emerald-50 border border-emerald-300 transition-all duration-500 scale-[1.02] shadow-sm';
+        pill.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shadow';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-white animate-bounce';
+        text.textContent = '✓ Запись подтверждена мастером!';
+        desc.className = 'text-xs text-emerald-900 font-medium mt-2 leading-relaxed';
+        desc.innerHTML = '🎉 <b>Отлично! Ангелина подтвердила ваше время визита.</b> Ждём вас по адресу: г. Вологда, Центр (ул. Мира). До встречи!';
+      } else if (status === 'cancelled') {
+        card.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 transition-all duration-500';
+        pill.className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-white';
+        text.textContent = 'Запись отменена';
+        desc.className = 'text-xs text-rose-900 mt-2';
+        desc.textContent = 'Мастер отклонил запись. Возможно, время уже занято. Пожалуйста, выберите другой день или напишите мастеру напрямую.';
+      }
+    }
+
+    // Voucher return to form
+    const voucherNewBookingBtn = document.getElementById('voucher-new-booking-btn');
+    if (voucherNewBookingBtn) {
+      voucherNewBookingBtn.addEventListener('click', () => {
+        if (liveStatusPollInterval) clearInterval(liveStatusPollInterval);
+        if (bookingVoucher) bookingVoucher.classList.add('hidden');
+        if (contactForm) {
+          contactForm.classList.remove('hidden');
+          contactForm.reset();
+          initDatePills();
+        }
       });
     }
 
