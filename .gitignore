@@ -6,6 +6,9 @@
 database.sqlite
 database.sqlite-shm
 database.sqlite-wal
+data/*.sqlite*
+data/*.db*
+*.sqlite*
 *.db
 *.sqlite3
 

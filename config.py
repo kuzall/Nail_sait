@@ -25,4 +25,18 @@ ADMIN_IDS = [int(x.strip()) for x in raw_admin_ids.split(",") if x.strip().isdig
 # Server & Database
 PORT = int(os.getenv("PORT", "8000"))
 WEB_APP_URL = os.getenv("WEB_APP_URL", "https://138.249.149.151.sslip.io/admin")
-DB_PATH = os.path.join(BASE_DIR, "database.sqlite")
+
+# Database in data/ folder with auto-migration
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, "database.sqlite")
+
+# Backward compatibility: auto-migrate root database.sqlite if present
+_legacy_db = os.path.join(BASE_DIR, "database.sqlite")
+if os.path.exists(_legacy_db) and not os.path.exists(DB_PATH):
+    try:
+        import shutil
+        shutil.move(_legacy_db, DB_PATH)
+    except Exception:
+        pass
+
