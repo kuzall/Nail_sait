@@ -61,8 +61,8 @@
 <body class="bg-[#FAF7F5] text-stone-800 font-sans min-h-screen selection:bg-brand-500 selection:text-white">
 
   <!-- ================= AUTH GUARD / LOGIN OVERLAY ================= -->
-  <div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-md w-full p-8 sm:p-10 relative">
+  <div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-rose-100 max-w-md w-full p-6 sm:p-10 relative">
       <div class="text-center mb-8">
         <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-brand-600 to-rose-400 flex items-center justify-center text-white font-serif text-2xl font-bold shadow-lg shadow-brand-500/25 mb-4">
           A
@@ -123,24 +123,24 @@
     
     <!-- Top Navigation Header -->
     <header class="glass sticky top-0 z-40 border-b border-rose-100/70">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
         
-        <div class="flex items-center gap-4">
-          <a href="index.html" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600 to-rose-400 flex items-center justify-center text-white font-serif text-xl font-bold shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <a href="/" class="flex items-center gap-2.5 sm:gap-3 group">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-brand-600 to-rose-400 flex items-center justify-center text-white font-serif text-lg sm:text-xl font-bold shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform shrink-0">
               A
             </div>
             <div>
-              <span class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-stone-900 block leading-tight">Ангелина</span>
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="font-serif text-lg sm:text-2xl font-bold tracking-tight text-stone-900 block leading-tight">Ангелина</span>
+              <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-brand-600 flex items-center gap-1 sm:gap-1.5">
+                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Панель управления записями
               </span>
             </div>
           </a>
         </div>
 
-        <div class="flex items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-4">
           <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             <span>Открыть сайт</span>
@@ -152,8 +152,8 @@
             <span class="font-serif font-bold text-stone-900">Ангелина Осина</span>
           </div>
 
-          <button id="logout-btn" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-rose-700 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-transparent transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <button id="logout-btn" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold text-rose-700 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 hover:border-transparent transition">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             <span>Выйти</span>
           </button>
         </div>
@@ -161,137 +161,139 @@
     </header>
 
     <!-- Main Content Body -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
+    <main class="max-w-7xl mx-auto px-2.5 sm:px-6 py-4 sm:py-8 flex-1 w-full space-y-4 sm:space-y-8">
       
       <!-- KPI Stats Summary Row -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
         
         <!-- Stat 1: New Bookings -->
-        <div class="bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
           <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-1">Новые заявки</span>
-            <span id="kpi-new-count" class="text-3xl sm:text-4xl font-serif font-bold text-brand-600 tracking-tight">0</span>
-            <span class="text-xs text-amber-600 font-medium block mt-1">Ожидают подтверждения</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-0.5 sm:mb-1">Новые заявки</span>
+            <span id="kpi-new-count" class="text-2xl sm:text-4xl font-serif font-bold text-brand-600 tracking-tight">0</span>
+            <span class="text-[10px] sm:text-xs text-amber-600 font-medium block mt-0.5 sm:mt-1">Ожидают мастера</span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
         </div>
 
         <!-- Stat 2: Confirmed Today -->
-        <div class="bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
           <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-1">Подтверждено</span>
-            <span id="kpi-confirmed-count" class="text-3xl sm:text-4xl font-serif font-bold text-emerald-600 tracking-tight">0</span>
-            <span class="text-xs text-emerald-600 font-medium block mt-1">В графике мастера</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-0.5 sm:mb-1">Подтверждено</span>
+            <span id="kpi-confirmed-count" class="text-2xl sm:text-4xl font-serif font-bold text-emerald-600 tracking-tight">0</span>
+            <span class="text-[10px] sm:text-xs text-emerald-600 font-medium block mt-0.5 sm:mt-1">В графике</span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
         </div>
 
         <!-- Stat 3: Total Completed -->
-        <div class="bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
           <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-1">Выполнено</span>
-            <span id="kpi-completed-count" class="text-3xl sm:text-4xl font-serif font-bold text-stone-800 tracking-tight">0</span>
-            <span class="text-xs text-stone-500 font-medium block mt-1">Успешных процедур</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-0.5 sm:mb-1">Выполнено</span>
+            <span id="kpi-completed-count" class="text-2xl sm:text-4xl font-serif font-bold text-stone-800 tracking-tight">0</span>
+            <span class="text-[10px] sm:text-xs text-stone-500 font-medium block mt-0.5 sm:mt-1">Процедур</span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-stone-100 text-stone-600 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-stone-100 text-stone-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </div>
         </div>
 
         <!-- Stat 4: Estimated Revenue -->
-        <div class="bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm flex items-center justify-between">
           <div>
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-1">Ожидаемая сумма</span>
-            <span id="kpi-revenue-total" class="text-2xl sm:text-3xl font-serif font-bold text-stone-900 tracking-tight">0 ₽</span>
-            <span class="text-xs text-brand-600 font-medium block mt-1">По активным записям</span>
+            <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 block mb-0.5 sm:mb-1">Ожидаемая сумма</span>
+            <span id="kpi-revenue-total" class="text-xl sm:text-3xl font-serif font-bold text-stone-900 tracking-tight">0 ₽</span>
+            <span class="text-[10px] sm:text-xs text-brand-600 font-medium block mt-0.5 sm:mt-1">По активным</span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-brand-600 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-50 text-brand-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
         </div>
 
       </section>
 
       <!-- ================= INTERACTIVE MASTER CALENDAR ================= -->
-      <section class="bg-white p-5 sm:p-7 rounded-3xl border border-rose-100/80 shadow-sm space-y-5">
+      <section class="bg-white p-3.5 sm:p-7 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm space-y-3.5 sm:space-y-5">
         
         <!-- Calendar Top Header: Title, Legend, Month Navigation -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
-          <div class="space-y-1">
-            <div class="flex items-center gap-3">
-              <h2 class="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight">Календарь расписания</h2>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-stone-100">
+          <div class="space-y-0.5 sm:space-y-1">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+              <h2 class="text-lg sm:text-2xl font-serif font-bold text-stone-900 tracking-tight">Календарь расписания</h2>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-semibold">
+                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Интерактивный
               </span>
             </div>
-            <p class="text-xs text-stone-500 font-normal">
-              Квадратики с записями подсвечены зеленым с указанием числа процедур. Нажмите на день для фильтрации записей.
+            <p class="text-[11px] sm:text-xs text-stone-500 font-normal leading-relaxed">
+              Квадратики с записями подсвечены зеленым с числом процедур. Нажмите на день для фильтрации.
             </p>
           </div>
 
           <!-- Month Selector & Controls -->
-          <div class="flex items-center gap-2 self-start md:self-auto">
-            <button id="cal-prev-btn" class="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-base transition" title="Предыдущий месяц">
-              ‹
-            </button>
-            <div id="cal-month-title" class="font-serif font-bold text-base sm:text-lg text-stone-900 min-w-[160px] text-center capitalize tracking-tight select-none">
-              Октябрь 2026
+          <div class="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full sm:w-auto pt-1 sm:pt-0">
+            <div class="flex items-center gap-1 sm:gap-2">
+              <button id="cal-prev-btn" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-sm sm:text-base transition" title="Предыдущий месяц">
+                ‹
+              </button>
+              <div id="cal-month-title" class="font-serif font-bold text-sm sm:text-lg text-stone-900 min-w-[110px] sm:min-w-[150px] text-center capitalize tracking-tight select-none">
+                Октябрь 2026
+              </div>
+              <button id="cal-next-btn" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-sm sm:text-base transition" title="Следующий месяц">
+                ›
+              </button>
             </div>
-            <button id="cal-next-btn" class="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-base transition" title="Следующий месяц">
-              ›
-            </button>
-            <button id="cal-today-btn" class="ml-1 px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-brand-700 text-xs font-semibold transition border border-rose-200/80">
+            <button id="cal-today-btn" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-brand-700 text-[11px] sm:text-xs font-semibold transition border border-rose-200/80 whitespace-nowrap">
               Сегодня
             </button>
           </div>
         </div>
 
         <!-- Legend & Active Day Filter Indicator -->
-        <div class="flex flex-wrap items-center justify-between gap-3 text-xs pt-0.5">
-          <div class="flex flex-wrap items-center gap-4">
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 rounded-md bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-[10px] text-emerald-800 font-bold">1</div>
-              <span class="text-stone-600 font-medium">Есть записи (число в квадратике)</span>
+        <div class="flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-[11px] sm:text-xs pt-0.5">
+          <div class="flex flex-wrap items-center gap-2.5 sm:gap-4">
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-md bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-[9px] sm:text-[10px] text-emerald-800 font-bold">1</div>
+              <span class="text-stone-600 font-medium">Есть записи</span>
             </div>
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 rounded-md bg-stone-50 border border-stone-200"></div>
-              <span class="text-stone-400 font-medium">Свободный день</span>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-md bg-stone-50 border border-stone-200"></div>
+              <span class="text-stone-400 font-medium">Свободно</span>
             </div>
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 rounded-md border-2 border-brand-500 bg-brand-50/50"></div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-md border-2 border-brand-500 bg-brand-50/50"></div>
               <span class="text-stone-600 font-medium">Сегодня</span>
             </div>
           </div>
 
           <!-- Active day filter bar (when day square is clicked) -->
-          <div id="cal-active-filter" class="hidden items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 px-3.5 py-1.5 rounded-xl font-medium shadow-sm">
-            <span>Выбран день: <strong id="cal-selected-day-label" class="font-bold text-emerald-800">11 октября 2026</strong> (<span id="cal-selected-count">0</span>)</span>
-            <button id="cal-reset-filter-btn" class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 bg-white px-2.5 py-0.5 rounded-lg border border-rose-200 transition">
-              ✕ Показать все дни
+          <div id="cal-active-filter" class="hidden items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-900 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl font-medium shadow-sm text-[11px] sm:text-xs">
+            <span>Выбран: <strong id="cal-selected-day-label" class="font-bold text-emerald-800">11 октября 2026</strong> (<span id="cal-selected-count">0</span>)</span>
+            <button id="cal-reset-filter-btn" class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold text-rose-600 hover:text-rose-800 bg-white px-2 py-0.5 rounded-lg border border-rose-200 transition">
+              ✕ Сброс
             </button>
           </div>
         </div>
 
         <!-- Calendar Days Grid (Квадратики) -->
-        <div class="overflow-x-auto pb-1">
+        <div class="w-full">
           <!-- Week Days Labels: Пн, Вт, Ср, Чт, Пт, Сб, Вс -->
-          <div class="grid grid-cols-7 gap-2 sm:gap-3 text-center mb-2.5 min-w-[620px]">
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-1">Пн</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-1">Вт</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-1">Ср</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-1">Чт</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-1">Пт</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-rose-500 py-1 font-bold">Сб</div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-rose-500 py-1 font-bold">Вс</div>
+          <div class="grid grid-cols-7 gap-1 sm:gap-2.5 text-center mb-1.5 sm:mb-2.5">
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-0.5 sm:py-1">Пн</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-0.5 sm:py-1">Вт</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-0.5 sm:py-1">Ср</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-0.5 sm:py-1">Чт</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-400 py-0.5 sm:py-1">Пт</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-rose-500 py-0.5 sm:py-1 font-bold">Сб</div>
+            <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-rose-500 py-0.5 sm:py-1 font-bold">Вс</div>
           </div>
 
           <!-- Grid of day tiles -->
-          <div id="calendar-days-grid" class="grid grid-cols-7 gap-2 sm:gap-3 min-w-[620px]">
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2.5">
             <!-- Rendered dynamically via JavaScript -->
           </div>
         </div>
@@ -299,49 +301,49 @@
       </section>
 
       <!-- Control Bar: Header, Tabs, Search, Add Button -->
-      <section class="bg-white p-4 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm space-y-4">
+      <section class="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm space-y-3.5 sm:space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
           <div>
-            <h2 class="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight">Журнал записей</h2>
-            <p class="text-xs text-stone-500 font-normal mt-0.5">Все онлайн-заявки и расписание мастера в реальном времени</p>
+            <h2 class="text-lg sm:text-2xl font-serif font-bold text-stone-900 tracking-tight">Журнал записей</h2>
+            <p class="text-[11px] sm:text-xs text-stone-500 font-normal mt-0.5">Все онлайн-заявки и расписание мастера в реальном времени</p>
           </div>
-          <div class="text-[11px] font-semibold uppercase tracking-wider text-brand-600 bg-brand-50 border border-brand-100/80 px-3 py-1 rounded-full self-start sm:self-auto flex items-center gap-1.5">
+          <div class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-brand-600 bg-brand-50 border border-brand-100/80 px-2.5 py-1 rounded-full self-start sm:self-auto flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             База SQLite активна
           </div>
         </div>
 
-        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
           
           <!-- Filter Tabs -->
-          <div class="flex flex-wrap items-center gap-2">
-            <button class="filter-tab px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition active bg-brand-600 text-white shadow-sm" data-status="all">
-              Все записи (<span id="count-all">0</span>)
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <button class="filter-tab px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide transition active bg-brand-600 text-white shadow-sm" data-status="all">
+              Все (<span id="count-all">0</span>)
             </button>
-            <button class="filter-tab px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="new">
+            <button class="filter-tab px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="new">
               🟡 Новые (<span id="count-new">0</span>)
             </button>
-            <button class="filter-tab px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="confirmed">
+            <button class="filter-tab px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="confirmed">
               🟢 Подтверждённые (<span id="count-confirmed">0</span>)
             </button>
-            <button class="filter-tab px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="completed">
+            <button class="filter-tab px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="completed">
               🟣 Выполненные (<span id="count-completed">0</span>)
             </button>
-            <button class="filter-tab px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="cancelled">
+            <button class="filter-tab px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide transition bg-stone-100 text-stone-600 hover:bg-stone-200" data-status="cancelled">
               ⚪ Отменённые (<span id="count-cancelled">0</span>)
             </button>
           </div>
 
           <!-- Actions: Search & Add New -->
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
             <div class="relative flex-1 sm:w-64">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
               </span>
-              <input type="text" id="search-input" placeholder="Поиск по имени или тел..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 text-xs font-medium focus:outline-none focus:border-brand-500">
+              <input type="text" id="search-input" placeholder="Поиск по имени или тел..." class="w-full pl-9 pr-3 py-2 sm:py-2.5 rounded-xl border border-stone-200 text-xs font-medium focus:outline-none focus:border-brand-500">
             </div>
 
-            <button id="open-add-modal-btn" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-rose-500 text-white text-xs font-semibold shadow-md shadow-brand-500/20 hover:from-brand-700 hover:to-rose-600 transition whitespace-nowrap">
+            <button id="open-add-modal-btn" class="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-rose-500 text-white text-[11px] sm:text-xs font-semibold shadow-md shadow-brand-500/20 hover:from-brand-700 hover:to-rose-600 transition whitespace-nowrap shrink-0">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               <span>+ Новая запись</span>
             </button>
@@ -794,8 +796,8 @@
       for (let i = startDayOfWeek - 1; i >= 0; i--) {
         const dayNum = daysInPrevMonth - i;
         const cell = document.createElement('div');
-        cell.className = "aspect-square min-h-[76px] sm:min-h-[88px] p-2 sm:p-2.5 rounded-2xl border border-stone-100 bg-stone-50/40 text-stone-300 flex flex-col justify-between select-none opacity-40";
-        cell.innerHTML = `<span class="text-xs font-semibold">${dayNum}</span>`;
+        cell.className = "aspect-square min-h-[44px] sm:min-h-[76px] p-1 sm:p-2.5 rounded-xl sm:rounded-2xl border border-stone-100 bg-stone-50/40 text-stone-300 flex flex-col justify-between select-none opacity-40";
+        cell.innerHTML = `<span class="text-[11px] sm:text-xs font-semibold leading-none">${dayNum}</span>`;
         grid.appendChild(cell);
       }
 
@@ -813,13 +815,13 @@
         const cell = document.createElement('div');
         cell.setAttribute('data-date-key', dateKey);
 
-        let cellClasses = "aspect-square min-h-[76px] sm:min-h-[88px] p-2 sm:p-2.5 rounded-2xl flex flex-col justify-between transition-all select-none relative cursor-pointer group ";
+        let cellClasses = "aspect-square min-h-[44px] sm:min-h-[76px] p-1 sm:p-2.5 rounded-xl sm:rounded-2xl flex flex-col justify-between transition-all select-none relative cursor-pointer group ";
 
         if (isSelected) {
-          cellClasses += "ring-4 ring-emerald-500/40 border-2 border-emerald-600 bg-emerald-100/95 shadow-md scale-[1.02] z-10 ";
+          cellClasses += "ring-2 sm:ring-4 ring-emerald-500/40 border-2 border-emerald-600 bg-emerald-100/95 shadow-md scale-[1.02] z-10 ";
         } else if (count > 0) {
           // GREEN SQUARE if bookings exist!
-          cellClasses += "bg-emerald-50/90 border-2 border-emerald-400 hover:border-emerald-500 hover:bg-emerald-100/80 shadow-sm hover:shadow-md hover:scale-[1.02] ";
+          cellClasses += "bg-emerald-50/90 border sm:border-2 border-emerald-400 hover:border-emerald-500 hover:bg-emerald-100/80 shadow-sm hover:shadow-md hover:scale-[1.02] ";
         } else {
           // Clean free day
           cellClasses += "bg-stone-50/50 border border-stone-200/70 hover:border-stone-300 hover:bg-stone-100/70 ";
@@ -833,13 +835,13 @@
 
         // Top line: Day number + indicators
         let topHtml = `
-          <div class="flex items-center justify-between w-full">
-            <span class="${count > 0 ? 'font-serif font-bold text-stone-900 text-sm sm:text-base' : 'font-semibold text-stone-600 text-xs sm:text-sm'}">
+          <div class="flex items-center justify-between w-full leading-none">
+            <span class="${count > 0 ? 'font-serif font-bold text-stone-900 text-xs sm:text-base' : 'font-semibold text-stone-600 text-xs sm:text-sm'}">
               ${d}
             </span>
             <div class="flex items-center gap-1">
-              ${isToday ? '<span class="text-[9px] font-bold uppercase tracking-wider text-brand-600 bg-white/90 px-1.5 py-0.5 rounded-md border border-brand-200">Сегодня</span>' : ''}
-              ${count > 0 ? '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>' : ''}
+              ${isToday ? '<span class="hidden md:inline text-[8px] font-bold uppercase tracking-wider text-brand-600 bg-white/90 px-1 py-0.5 rounded border border-brand-200">Сегодня</span>' : ''}
+              ${count > 0 ? '<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>' : ''}
             </div>
           </div>
         `;
@@ -848,16 +850,16 @@
         let bottomHtml = '';
         if (count > 0) {
           bottomHtml = `
-            <div class="pt-1 flex items-center justify-between w-full">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-lg bg-emerald-600 text-white font-bold text-[10px] sm:text-[11px] shadow-sm">
+            <div class="pt-0.5 sm:pt-1 flex items-center justify-center sm:justify-start w-full">
+              <span class="inline-flex items-center justify-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-0.5 rounded sm:rounded-lg bg-emerald-600 text-white font-bold text-[9px] sm:text-[11px] shadow-sm leading-tight">
                 <span>🟢 ${count}</span>
-                <span class="hidden sm:inline font-normal text-[9px]">${getWordEndingRu(count)}</span>
+                <span class="hidden md:inline font-normal text-[9px]">${getWordEndingRu(count)}</span>
               </span>
             </div>
           `;
         } else {
           bottomHtml = `
-            <div class="text-[10px] text-stone-300 group-hover:text-stone-500 transition font-medium text-right pt-1 opacity-0 group-hover:opacity-100">
+            <div class="text-[10px] text-stone-300 group-hover:text-stone-500 transition font-medium text-right pt-1 opacity-0 group-hover:opacity-100 hidden sm:block">
               + запись
             </div>
           `;
@@ -884,8 +886,8 @@
       const remainingCells = (7 - (totalCells % 7)) % 7;
       for (let i = 1; i <= remainingCells; i++) {
         const cell = document.createElement('div');
-        cell.className = "aspect-square min-h-[76px] sm:min-h-[88px] p-2 sm:p-2.5 rounded-2xl border border-stone-100 bg-stone-50/40 text-stone-300 flex flex-col justify-between select-none opacity-40";
-        cell.innerHTML = `<span class="text-xs font-semibold">${i}</span>`;
+        cell.className = "aspect-square min-h-[44px] sm:min-h-[76px] p-1 sm:p-2.5 rounded-xl sm:rounded-2xl border border-stone-100 bg-stone-50/40 text-stone-300 flex flex-col justify-between select-none opacity-40";
+        cell.innerHTML = `<span class="text-[11px] sm:text-xs font-semibold leading-none">${i}</span>`;
         grid.appendChild(cell);
       }
     }
@@ -989,7 +991,7 @@
         const cleanPhone = (item.phone || '').replace(/[^\d+]/g, '');
 
         const card = document.createElement('div');
-        card.className = "bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5";
+        card.className = "bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100/80 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-5";
         
         const escId = escapeHtml(item.id);
         const escName = escapeHtml(item.name);
