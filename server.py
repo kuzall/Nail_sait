@@ -7,16 +7,65 @@ import time
 import re
 import threading
 import urllib.request
+import hashlib
+import hmac
+import uuid
 from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 # Configuration & environment
-from config import BOT_TOKEN as TELEGRAM_BOT_TOKEN, ADMIN_IDS as ADMIN_CHAT_IDS, DB_PATH, BASE_DIR
+from config import (
+    BOT_TOKEN as TELEGRAM_BOT_TOKEN,
+    ADMIN_IDS as ADMIN_CHAT_IDS,
+    DB_PATH, BASE_DIR,
+    ADMIN_USERNAME, ADMIN_PASSWORD_HASH, SESSION_SECRET, ALLOWED_ORIGIN
+)
+
+MAX_BODY_SIZE = 1_048_576  # 1 MB
 
 RECENT_BOOKING_IPS = {}  # ip -> timestamp
 
+def cleanup_old_ips():
+    """Удаляет записи старше 60 секунд для предотвращения утечки памяти"""
+    now = time.time()
+    expired = [ip for ip, ts in RECENT_BOOKING_IPS.items() if now - ts > 60]
+    for ip in expired:
+        del RECENT_BOOKING_IPS[ip]
+
+def escape_html(text):
+    """Экранирует символы для Telegram HTML"""
+    if not text:
+        return ""
+    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+def generate_auth_token(username):
+    """Создаёт подписанный токен: username:timestamp:signature"""
+    ts = str(int(time.time()))
+    msg = f"{username}:{ts}"
+    sig = hmac.new(SESSION_SECRET.encode(), msg.encode(), hashlib.sha256).hexdigest()[:32]
+    return f"{msg}:{sig}"
+
+def verify_auth_token(token, max_age=86400):
+    """Проверяет валидность токена (24 часа)"""
+    try:
+        parts = token.split(":")
+        if len(parts) != 3:
+            return False
+        username, ts, sig = parts
+        msg = f"{username}:{ts}"
+        expected = hmac.new(SESSION_SECRET.encode(), msg.encode(), hashlib.sha256).hexdigest()[:32]
+        if not hmac.compare_digest(sig, expected):
+            return False
+        if time.time() - int(ts) > max_age:
+            return False
+        return True
+    except Exception:
+        return False
+
 def validate_booking_data(payload, client_ip):
+    cleanup_old_ips()
+
     # 1. Honeypot check (hidden bot field)
     if payload.get("website_url") or payload.get("email_check"):
         return False, "Spam detected"
@@ -107,12 +156,12 @@ def send_telegram_booking_alert(booking):
     text = (
         f"✨ <b>НОВАЯ ЗАПИСЬ С САЙТА!</b> ✨\n"
         f"━━━━━━━━━━━━━━━━━━\n"
-        f"👤 <b>Клиент:</b> {booking.get('name')}\n"
-        f"📱 <b>Телефон:</b> <code>{booking.get('phone')}</code>\n"
-        f"💅 <b>Услуга:</b> {booking.get('service')}\n"
+        f"👤 <b>Клиент:</b> {escape_html(booking.get('name'))}\n"
+        f"📱 <b>Телефон:</b> <code>{escape_html(booking.get('phone'))}</code>\n"
+        f"💅 <b>Услуга:</b> {escape_html(booking.get('service'))}\n"
         f"💵 <b>Сумма:</b> <b>{price_str}</b>\n"
-        f"🕒 <b>Дата и время:</b> <b>{booking.get('date')}</b>\n"
-        f"💬 <b>Пожелание:</b> <i>{booking.get('notes') or 'Заявка с сайта'}</i>\n"
+        f"🕒 <b>Дата и время:</b> <b>{escape_html(booking.get('date'))}</b>\n"
+        f"💬 <b>Пожелание:</b> <i>{escape_html(booking.get('notes') or 'Заявка с сайта')}</i>\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"Статус: 🟡 <b>Ожидает подтверждения</b>"
     )
@@ -214,22 +263,29 @@ class AppHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=BASE_DIR, **kwargs)
 
+    def require_admin(self):
+        """Проверяет заголовок Authorization: Bearer <token>"""
+        auth = self.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return False
+        return verify_auth_token(auth[7:])
+
     def send_json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode('utf-8')
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Content-Length', str(len(body)))
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Origin', ALLOWED_ORIGIN)
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self):
         self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Origin', ALLOWED_ORIGIN)
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
 
     def do_GET(self):
@@ -237,8 +293,10 @@ class AppHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         params = parse_qs(parsed.query)
 
-        # API: Get all bookings for Master
+        # API: Get all bookings for Master (ADMIN ONLY)
         if path == "/api/bookings":
+            if not self.require_admin():
+                return self.send_json({"success": False, "error": "Unauthorized"}, 401)
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM bookings ORDER BY created_at DESC")
@@ -363,6 +421,8 @@ class AppHandler(SimpleHTTPRequestHandler):
         path = parsed.path
 
         content_length = int(self.headers.get('Content-Length', 0))
+        if content_length > MAX_BODY_SIZE:
+            return self.send_json({"success": False, "error": "Request too large"}, 413)
         body_bytes = self.rfile.read(content_length) if content_length > 0 else b'{}'
         try:
             payload = json.loads(body_bytes.decode('utf-8'))
@@ -468,7 +528,7 @@ class AppHandler(SimpleHTTPRequestHandler):
                 else:
                     date = "Сегодня, " + datetime.now().strftime("%H:%M")
 
-            booking_id = "BK-" + str(random.randint(100, 999))
+            booking_id = "BK-" + uuid.uuid4().hex[:8].upper()
             
             # Extract price if present in service string
             match = re.search(r'(\d[\d\s]*)\s*₽', service)
@@ -491,8 +551,10 @@ class AppHandler(SimpleHTTPRequestHandler):
 
             return self.send_json({"success": True, "booking": new_item})
 
-        # API: Update booking (status or notes)
+        # API: Update booking (status or notes) — ADMIN ONLY
         elif path == "/api/bookings/update":
+            if not self.require_admin():
+                return self.send_json({"success": False, "error": "Unauthorized"}, 401)
             booking_id = payload.get("id")
             if not booking_id:
                 return self.send_json({"success": False, "error": "ID обязателен"}, 400)
@@ -515,8 +577,8 @@ class AppHandler(SimpleHTTPRequestHandler):
                             msg = (
                                 f"🎉 <b>Ваша запись подтверждена!</b>\n\n"
                                 f"🌸 Мастер: <b>Ангелина Осина</b>\n"
-                                f"💅 Услуга: <b>{b.get('service')}</b>\n"
-                                f"🕒 Дата и время: <b>{b.get('date')}</b>\n"
+                                f"💅 Услуга: <b>{escape_html(b.get('service'))}</b>\n"
+                                f"🕒 Дата и время: <b>{escape_html(b.get('date'))}</b>\n"
                                 f"📍 Адрес: <b>г. Вологда, Центр (ул. Мира)</b>\n\n"
                                 f"Ждём вас на идеальный маникюр! ✨"
                             )
@@ -524,7 +586,7 @@ class AppHandler(SimpleHTTPRequestHandler):
                         elif new_status == "cancelled":
                             msg = (
                                 f"❌ <b>Запись отменена</b>\n\n"
-                                f"Ваша запись на <b>{b.get('date')}</b> ({b.get('service')}) была отменена.\n"
+                                f"Ваша запись на <b>{escape_html(b.get('date'))}</b> ({escape_html(b.get('service'))}) была отменена.\n"
                                 f"Вы можете выбрать другое удобное время на сайте."
                             )
                             threading.Thread(target=notify_telegram_client, args=(client_id, msg), daemon=True).start()
@@ -535,8 +597,10 @@ class AppHandler(SimpleHTTPRequestHandler):
             conn.close()
             return self.send_json({"success": True})
 
-        # API: Delete booking
+        # API: Delete booking — ADMIN ONLY
         elif path == "/api/bookings/delete":
+            if not self.require_admin():
+                return self.send_json({"success": False, "error": "Unauthorized"}, 401)
             booking_id = payload.get("id")
             if not booking_id:
                 return self.send_json({"success": False, "error": "ID обязателен"}, 400)
@@ -548,13 +612,15 @@ class AppHandler(SimpleHTTPRequestHandler):
             conn.close()
             return self.send_json({"success": True})
 
-        # API: Master login
+        # API: Master login — hash-based auth, returns signed token
         elif path == "/api/login":
             username = payload.get("username", "").strip().lower()
             password = payload.get("password", "").strip()
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-            if password == "Angelina231200@" or (username in ["angelina", "admin", "alexey"] and password in ["Angelina231200@", "angelina2026"]):
-                return self.send_json({"success": True, "token": "session_ok", "user": "Ангелина Осина"})
+            if username in [ADMIN_USERNAME, "admin"] and password_hash == ADMIN_PASSWORD_HASH:
+                token = generate_auth_token(username)
+                return self.send_json({"success": True, "token": token, "user": "Ангелина Осина"})
             else:
                 return self.send_json({"success": False, "error": "Неверный логин или пароль"}, 401)
 

@@ -26,6 +26,12 @@ ADMIN_IDS = [int(x.strip()) for x in raw_admin_ids.split(",") if x.strip().isdig
 PORT = int(os.getenv("PORT", "8000"))
 WEB_APP_URL = os.getenv("WEB_APP_URL", "https://138.249.149.151.sslip.io/admin")
 
+# Admin auth (server-side only)
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "angelina")
+ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "8ebf5451b01ff96307c103b714d2fcb9894d4839f75977690dbb814548f061a7")
+SESSION_SECRET = os.getenv("SESSION_SECRET", "a7c5504236ffc70bc21f5ce9e2acca198caae01c3ae865b1886166cb0be81d2a")
+ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "https://138.249.149.151.sslip.io")
+
 # Database in data/ folder with auto-migration
 DATA_DIR = os.path.join(BASE_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)

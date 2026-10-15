@@ -3,6 +3,7 @@ import sys
 import asyncio
 import sqlite3
 import re
+import html
 from datetime import datetime
 
 # Windows console encoding safeguard
@@ -73,9 +74,9 @@ def render_client_booking_card(b: dict) -> str:
     return (
         f"🌸 <b>Ваша запись в студию Ангелины:</b>\n"
         f"━━━━━━━━━━━━━━━━━━\n"
-        f"🎫 <b>Номер брони:</b> <code>№ {b['id']}</code>\n"
-        f"💅 <b>Услуга:</b> {b['service']}\n"
-        f"🕒 <b>Дата и время:</b> <b>{b['date']}</b>\n"
+        f"🎫 <b>Номер брони:</b> <code>№ {html.escape(str(b.get('id', '')))}</code>\n"
+        f"💅 <b>Услуга:</b> {html.escape(str(b.get('service', '')))}\n"
+        f"🕒 <b>Дата и время:</b> <b>{html.escape(str(b.get('date', '')))}</b>\n"
         f"💵 <b>Стоимость:</b> <b>{price_str}</b>\n"
         f"📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира / Батюшкова)\n"
         f"━━━━━━━━━━━━━━━━━━\n"
@@ -183,10 +184,10 @@ def render_schedule_summary(title: str, rows: list) -> str:
         svc_display = svc if (price_str and price_str in svc) else f"{svc} ({price_str})"
 
         lines.append(
-            f"<b>{idx}. {b['name']}</b>\n"
-            f"🕒 Время: <b>{b['date']}</b>\n"
-            f"📱 Телефон: <code>{b['phone']}</code>\n"
-            f"💅 Услуга: {svc_display}\n"
+            f"<b>{idx}. {html.escape(str(b.get('name', '')))}</b>\n"
+            f"🕒 Время: <b>{html.escape(str(b.get('date', '')))}</b>\n"
+            f"📱 Телефон: <code>{html.escape(str(b.get('phone', '')))}</code>\n"
+            f"💅 Услуга: {html.escape(str(svc_display))}\n"
             f"Статус: <b>{status_icon}</b>"
         )
         if idx < len(rows):
@@ -208,13 +209,13 @@ def render_booking_card(b: dict) -> str:
     price_str = f"{price_val:,} ₽".replace(",", " ") if price_val else "По прайсу"
 
     return (
-        f"🌸 <b>Запись клиента: {b['name']}</b> (№ {b['id']})\n"
+        f"🌸 <b>Запись клиента: {html.escape(str(b.get('name', '')))}</b> (№ {html.escape(str(b.get('id', '')))} )\n"
         f"━━━━━━━━━━━━━━━━━━\n"
-        f"🕒 <b>Дата и время:</b> <b>{b['date']}</b>\n"
-        f"📱 <b>Телефон:</b> <code>{b['phone']}</code>\n"
-        f"💅 <b>Услуга:</b> {b['service']}\n"
+        f"🕒 <b>Дата и время:</b> <b>{html.escape(str(b.get('date', '')))}</b>\n"
+        f"📱 <b>Телефон:</b> <code>{html.escape(str(b.get('phone', '')))}</code>\n"
+        f"💅 <b>Услуга:</b> {html.escape(str(b.get('service', '')))}\n"
         f"💵 <b>Сумма:</b> <b>{price_str}</b>\n"
-        f"💬 <b>Заметка:</b> <i>{b.get('notes', 'Заявка с сайта') or '—'}</i>\n"
+        f"💬 <b>Заметка:</b> <i>{html.escape(str(b.get('notes', 'Заявка с сайта') or '—'))}</i>\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"Статус: <b>{status_emoji}</b>"
     )
@@ -231,8 +232,9 @@ async def cmd_start(message: Message):
 
     if deep_code:
         clean_code = deep_code.upper()
-        if not clean_code.startswith("BK-") and clean_code.isdigit():
-            clean_code = f"BK-{clean_code}"
+        if not clean_code.startswith("BK-"):
+            if clean_code.isdigit() or re.match(r'^[A-F0-9]{6,12}$', clean_code):
+                clean_code = f"BK-{clean_code}"
 
         conn = get_db()
         cursor = conn.cursor()
@@ -759,7 +761,7 @@ async def handle_client_text_lookup(message: Message):
     clean_id = text.upper().replace("#", "").strip()
     if clean_id.startswith("BK") and not clean_id.startswith("BK-"):
         clean_id = f"BK-{clean_id[2:]}"
-    elif clean_id.isdigit() and len(clean_id) <= 5:
+    elif (clean_id.isdigit() and len(clean_id) <= 5) or re.match(r'^[A-F0-9]{6,12}$', clean_id):
         clean_id = f"BK-{clean_id}"
 
     conn = get_db()

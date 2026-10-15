@@ -1905,6 +1905,16 @@
       });
     }
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     async function fetchClientBookings(phone) {
       if (!statusPanelResults) return;
       statusPanelResults.innerHTML = '<div class="text-stone-400 text-xs text-center py-4">Поиск записей в базе...</div>';
@@ -1945,17 +1955,22 @@
         let html = '<div class="space-y-3 pt-2">';
         records.forEach(item => {
           const st = statusLabels[item.status] || statusLabels['new'];
+          const escId = escapeHtml(item.id);
+          const escName = escapeHtml(item.name);
+          const escService = escapeHtml(item.service);
+          const escDate = escapeHtml(item.date || 'Дата уточняется');
+
           html += `
             <div class="p-4 rounded-2xl border border-stone-200 bg-stone-50/70 space-y-2 text-xs">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-stone-900">№ ${item.id}</span>
+                <span class="font-bold text-stone-900">№ ${escId}</span>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${st.color}">
                   ${st.label}
                 </span>
               </div>
-              <div class="font-bold text-sm text-stone-900">${item.name}</div>
-              <div class="text-brand-600 font-semibold">${item.service}</div>
-              <div class="text-stone-500">🕒 ${item.date || 'Дата уточняется'}</div>
+              <div class="font-bold text-sm text-stone-900">${escName}</div>
+              <div class="text-brand-600 font-semibold">${escService}</div>
+              <div class="text-stone-500">🕒 ${escDate}</div>
               <div class="text-stone-500">📍 г. Вологда, Центр (ул. Мира)</div>
               <div class="pt-2 flex flex-col gap-2">
                 <a href="https://t.me/kalendarlinibot?start=${encodeURIComponent(item.id)}" target="_blank" class="w-full text-center py-2 px-3 rounded-xl bg-gradient-to-r from-sky-50 to-blue-50 text-[#2AABEE] hover:from-sky-100 hover:to-blue-100 font-semibold text-xs transition flex items-center justify-center gap-1.5 border border-sky-100">

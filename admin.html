@@ -527,11 +527,36 @@
       }
     ];
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem('angelina_token') || '';
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      };
+    }
+
     let currentBookings = [];
 
     async function loadBookings() {
       try {
-        const res = await fetch('/api/bookings');
+        const res = await fetch('/api/bookings', {
+          headers: getAuthHeaders()
+        });
+        if (res.status === 401) {
+          localStorage.removeItem('angelina_token');
+          checkAuth();
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.bookings)) {
@@ -567,8 +592,8 @@
     const togglePassBtn = document.getElementById('toggle-pass-btn');
 
     function checkAuth() {
-      const isAuth = localStorage.getItem('angelina_auth') === 'true';
-      if (isAuth) {
+      const token = localStorage.getItem('angelina_token');
+      if (token) {
         loginOverlay.classList.add('hidden');
         dashboardApp.classList.remove('hidden');
         loadBookings();
@@ -583,7 +608,6 @@
       const user = loginUser.value.trim().toLowerCase();
       const pass = loginPass.value.trim();
 
-      // Check with backend API first
       try {
         const res = await fetch('/api/login', {
           method: 'POST',
@@ -591,26 +615,21 @@
           body: JSON.stringify({ username: user, password: pass })
         });
         const data = await res.json();
-        if (data.success) {
-          localStorage.setItem('angelina_auth', 'true');
+        if (data.success && data.token) {
+          localStorage.setItem('angelina_token', data.token);
           loginError.classList.add('hidden');
           checkAuth();
           return;
+        } else {
+          loginError.classList.remove('hidden');
         }
-      } catch (err) {}
-
-      // Local credentials fallback
-      if (pass === 'Angelina231200@' || ((user === 'angelina' || user === 'admin' || user === 'alexey') && (pass === 'Angelina231200@' || pass === 'angelina2026'))) {
-        localStorage.setItem('angelina_auth', 'true');
-        loginError.classList.add('hidden');
-        checkAuth();
-      } else {
+      } catch (err) {
         loginError.classList.remove('hidden');
       }
     });
 
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('angelina_auth');
+      localStorage.removeItem('angelina_token');
       checkAuth();
     });
 
@@ -972,6 +991,13 @@
         const card = document.createElement('div');
         card.className = "bg-white p-5 sm:p-6 rounded-3xl border border-rose-100/80 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5";
         
+        const escId = escapeHtml(item.id);
+        const escName = escapeHtml(item.name);
+        const escService = escapeHtml(item.service);
+        const escNotes = escapeHtml(item.notes || '');
+        const escDate = escapeHtml(item.date || 'Дата уточняется');
+        const escPhone = escapeHtml(item.phone);
+
         card.innerHTML = `
           <div class="flex-1 space-y-2.5 w-full lg:w-auto">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -979,24 +1005,24 @@
                 <span class="w-1.5 h-1.5 rounded-full ${conf.dot}"></span>
                 ${conf.label}
               </span>
-              <span class="text-xs font-semibold text-stone-400 font-mono">#${item.id}</span>
+              <span class="text-xs font-semibold text-stone-400 font-mono">#${escId}</span>
               <span class="text-xs text-stone-300">•</span>
               <span class="text-xs font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                ${item.date || 'Дата уточняется'}
+                ${escDate}
               </span>
             </div>
 
             <div class="flex flex-wrap items-baseline gap-3">
-              <h4 class="text-lg sm:text-xl font-serif font-bold text-stone-900 tracking-tight">${item.name}</h4>
-              <span class="text-xs font-semibold text-brand-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200/80">${item.service}</span>
+              <h4 class="text-lg sm:text-xl font-serif font-bold text-stone-900 tracking-tight">${escName}</h4>
+              <span class="text-xs font-semibold text-brand-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200/80">${escService}</span>
             </div>
 
             <!-- Notes line -->
             <div class="flex items-center gap-2 pt-1 text-xs">
               <span class="text-stone-400 font-semibold uppercase tracking-wider text-[11px]">Заметка:</span>
-              <input type="text" value="${item.notes || ''}" placeholder="Добавить пометку мастера..." 
-                     onchange="updateNotes('${item.id}', this.value)"
+              <input type="text" value="${escNotes}" placeholder="Добавить пометку мастера..." 
+                     onchange="updateNotes('${escId}', this.value)"
                      class="flex-1 max-w-lg px-2.5 py-1 rounded-lg border border-transparent hover:border-stone-200 focus:border-brand-400 focus:bg-white text-xs font-medium text-stone-700 placeholder-stone-300 focus:outline-none transition">
             </div>
           </div>
@@ -1007,7 +1033,7 @@
             <!-- Quick Messenger / Phone buttons -->
             <a href="tel:${cleanPhone}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition" title="Позвонить">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-              <span>${item.phone}</span>
+              <span>${escPhone}</span>
             </a>
 
             <a href="https://t.me/kuzall" target="_blank" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 hover:bg-sky-500 hover:text-white text-sky-600 transition" title="Написать в Telegram">
@@ -1015,7 +1041,7 @@
             </a>
 
             <!-- Status Changer -->
-            <select onchange="updateStatus('${item.id}', this.value)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white hover:border-brand-400 focus:outline-none transition">
+            <select onchange="updateStatus('${escId}', this.value)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 bg-white hover:border-brand-400 focus:outline-none transition">
               <option value="new" ${item.status === 'new' ? 'selected' : ''}>🟡 Новая</option>
               <option value="confirmed" ${item.status === 'confirmed' ? 'selected' : ''}>🟢 Подтверждена</option>
               <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>🟣 Выполнена</option>
@@ -1023,7 +1049,7 @@
             </select>
 
             <!-- Delete button -->
-            <button onclick="deleteBooking('${item.id}')" class="w-9 h-9 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Удалить запись">
+            <button onclick="deleteBooking('${escId}')" class="w-9 h-9 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition" title="Удалить запись">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </button>
           </div>
@@ -1040,11 +1066,15 @@
       renderDashboard();
 
       try {
-        await fetch('/api/bookings/update', {
+        const res = await fetch('/api/bookings/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ id, status: newStatus })
         });
+        if (res.status === 401) {
+          localStorage.removeItem('angelina_token');
+          checkAuth();
+        }
       } catch (e) {
         localStorage.setItem('angelina_bookings', JSON.stringify(currentBookings));
       }
@@ -1055,11 +1085,15 @@
       if (item) item.notes = notes;
 
       try {
-        await fetch('/api/bookings/update', {
+        const res = await fetch('/api/bookings/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ id, notes })
         });
+        if (res.status === 401) {
+          localStorage.removeItem('angelina_token');
+          checkAuth();
+        }
       } catch (e) {
         localStorage.setItem('angelina_bookings', JSON.stringify(currentBookings));
       }
@@ -1071,11 +1105,15 @@
         renderDashboard();
 
         try {
-          await fetch('/api/bookings/delete', {
+          const res = await fetch('/api/bookings/delete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ id })
           });
+          if (res.status === 401) {
+            localStorage.removeItem('angelina_token');
+            checkAuth();
+          }
         } catch (e) {
           localStorage.setItem('angelina_bookings', JSON.stringify(currentBookings));
         }
