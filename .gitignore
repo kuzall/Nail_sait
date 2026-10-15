@@ -1,0 +1,35 @@
+# Environment variables & secrets (CRITICAL)
+.env
+*.env.local
+
+# SQLite Database (contains client phone numbers and personal data)
+database.sqlite
+database.sqlite-shm
+database.sqlite-wal
+*.db
+*.sqlite3
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS temporary files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and scratch
+*.log
+_old_reference/
