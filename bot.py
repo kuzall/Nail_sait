@@ -23,7 +23,8 @@ from aiogram.types import (
     KeyboardButton,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    WebAppInfo
+    WebAppInfo,
+    MenuButtonWebApp
 )
 from aiogram.client.default import DefaultBotProperties
 
@@ -333,14 +334,31 @@ async def cmd_my_booking(message: Message):
 
 @dp.message(F.text == "📍 Адрес и контакты")
 async def cmd_contacts(message: Message):
+    site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
+    if not site_url.startswith("http"):
+        site_url = "https://138.249.149.151.sslip.io"
+    booking_url = f"{site_url}/#booking"
+
+    contacts_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="💅 Записаться онлайн", web_app=WebAppInfo(url=booking_url)),
+            InlineKeyboardButton(text="🌐 Наш сайт", url=site_url)
+        ],
+        [
+            InlineKeyboardButton(text="💬 Написать мастеру", url="https://t.me/kuzall"),
+            InlineKeyboardButton(text="📍 Навигатор (Карты)", url="https://yandex.ru/maps/-/CDT65-0A")
+        ]
+    ])
+
     await message.answer(
         "🌸 <b>Студия ногтевого сервиса Ангелины Осиной</b>\n\n"
         "📍 <b>Адрес:</b> г. Вологда, Центр (ул. Мира / Батюшкова)\n"
         "🕒 <b>График работы:</b> Ежедневно: 09:00 — 21:00\n"
         "📱 <b>Телефон / Мессенджер MAX:</b> <code>+7 (992) 282-11-58</code>\n"
-        "✈️ <b>Telegram мастера:</b> @kuzall\n\n"
+        "✈️ <b>Telegram мастера:</b> @kuzall\n"
+        f"🌐 <b>Официальный сайт:</b> {site_url}\n\n"
         "<i>Уютная студия в центре Вологды, стерильные инструменты и авторский уход.</i>",
-        reply_markup=get_client_keyboard()
+        reply_markup=contacts_kb
     )
 
 @dp.message(F.text == "📅 Записи на сегодня")
@@ -799,6 +817,23 @@ async def main():
     print(f"🚀 Angelina Studio Bot started successfully!")
     print(f"Admins: {ADMIN_IDS}")
     print(f"Database: {DB_PATH}")
+    
+    # Configure Telegram WebApp Menu Button for all users
+    try:
+        site_url = WEB_APP_URL.replace("/admin", "").rstrip("/")
+        if not site_url.startswith("http"):
+            site_url = "https://138.249.149.151.sslip.io"
+        booking_url = f"{site_url}/#booking"
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="💅 Запись",
+                web_app=WebAppInfo(url=booking_url)
+            )
+        )
+        print(f"✅ Chat Menu Button set: {booking_url}")
+    except Exception as e:
+        print(f"Menu button config notice: {e}")
+
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 

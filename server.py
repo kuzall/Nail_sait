@@ -206,20 +206,7 @@ def init_db():
         if col_name not in existing_cols:
             cursor.execute(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}")
 
-    # Check if empty, add sample demo bookings
-    cursor.execute("SELECT COUNT(*) as count FROM bookings")
-    count = cursor.fetchone()["count"]
-    if count == 0:
-        demo_bookings = [
-            ('BK-104', 'Дарья Ковалёва', '+7 (921) 716-44-55', 'Маникюр + укрепление (3 700 ₽)', 3700, 'Сегодня, 17:30', 'new', 'Заявка с сайта. Хочет классический белый френч на квадрат.'),
-            ('BK-103', 'Екатерина Смирнова', '+7 (911) 501-22-33', 'Маникюр + гель-лак (3 200 ₽)', 3200, 'Завтра, 14:00', 'confirmed', 'Постоянная клиентка. Тонкая кутикула, любит нюд.'),
-            ('BK-102', 'Алина Васильева', '+7 (953) 512-88-99', 'Smart-педикюр полный (2 300 ₽)', 2300, '14 окт, 11:00', 'confirmed', 'Первый визит, скидка 15%.'),
-            ('BK-101', 'Мария Белова', '+7 (921) 123-99-00', 'Маникюр с дизайном (4 200 ₽)', 4200, 'Вчера, 16:00', 'completed', 'Выполнено, стемпинг и градиент.')
-        ]
-        cursor.executemany("""
-        INSERT INTO bookings (id, name, phone, service, price, date, status, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, demo_bookings)
+    # Ensure table schema is up to date without injecting sample test data
     conn.commit()
     conn.close()
 
@@ -566,7 +553,7 @@ class AppHandler(SimpleHTTPRequestHandler):
             username = payload.get("username", "").strip().lower()
             password = payload.get("password", "").strip()
 
-            if (username in ["angelina", "admin", "alexey"]) and (password in ["1234", "angelina2026"]):
+            if password == "Angelina231200@" or (username in ["angelina", "admin", "alexey"] and password in ["Angelina231200@", "angelina2026"]):
                 return self.send_json({"success": True, "token": "session_ok", "user": "Ангелина Осина"})
             else:
                 return self.send_json({"success": False, "error": "Неверный логин или пароль"}, 401)
